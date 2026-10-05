@@ -13,6 +13,7 @@ import type {
   TIssuesResponse,
   ViewFlags,
   TBulkOperationsPayload,
+  TBulkOperationsResponse,
   TProfileViews,
 } from "@plane/types";
 import { UserService } from "@/services/user.service";
@@ -56,7 +57,11 @@ export interface IProfileIssues extends IBaseIssuesStore {
   archiveIssue: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
   removeBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
   archiveBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
-  bulkUpdateProperties: (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => Promise<void>;
+  bulkUpdateProperties: (
+    workspaceSlug: string,
+    projectId: string,
+    data: TBulkOperationsPayload
+  ) => Promise<TBulkOperationsResponse>;
 
   quickAddIssue: undefined;
 }

@@ -155,6 +155,14 @@ export type TBulkOperationsPayload = {
   properties: Partial<TBulkIssueProperties>;
 };
 
+export type TBulkOperationsFailureCode = "not_found" | "invalid_date_range";
+
+export type TBulkOperationsResponse = {
+  updated_issue_ids: string[];
+  unchanged_issue_ids: string[];
+  failed: { issue_id: string; code: TBulkOperationsFailureCode }[];
+};
+
 export type TWorkItemWidgets = "sub-work-items" | "relations" | "links" | "attachments";
 
 export type TIssueServiceType = EIssueServiceType.ISSUES | EIssueServiceType.EPICS | EIssueServiceType.WORK_ITEMS;

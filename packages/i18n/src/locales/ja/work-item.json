@@ -326,6 +326,31 @@
         "title": "作業項目を更新できません",
         "message": "一部の作業項目では状態の変更が許可されていません。状態の変更が許可されていることを確認してください。"
       }
+    },
+    "selected_count": "{count, plural, one{#件を選択中} other{#件を選択中}}",
+    "clear_selection": "選択を解除",
+    "properties": {
+      "state": "状態",
+      "assignees": "担当者",
+      "priority": "優先度",
+      "start_date": "開始日",
+      "due_date": "期限",
+      "module": "モジュール",
+      "labels": "ラベル"
+    },
+    "clear_start_date": "開始日をクリア",
+    "clear_due_date": "期限をクリア",
+    "toast": {
+      "success_title": "作業項目を更新しました",
+      "success_message": "{count, plural, one{#件の作業項目を更新しました} other{#件の作業項目を更新しました}}",
+      "partial_title": "一部の作業項目は更新されませんでした",
+      "partial_message": "{updated}件を更新、{failed}件は未更新",
+      "error_title": "作業項目を更新できません",
+      "error_message": "問題が発生しました。作業項目は更新されていません。"
+    },
+    "failure_reasons": {
+      "not_found": "{count, plural, one{#件は利用できなくなりました} other{#件は利用できなくなりました}}",
+      "invalid_date_range": "{count, plural, one{#件は開始日が期限より後です} other{#件は開始日が期限より後です}}"
     }
   },
   "recurring_work_items": {

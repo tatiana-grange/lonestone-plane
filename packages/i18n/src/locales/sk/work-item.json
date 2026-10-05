@@ -326,6 +326,31 @@
         "title": "Nemožno aktualizovať pracovné položky",
         "message": "Zmena stavu nie je povolená pre niektoré pracovné položky. Uistite sa, že zmena stavu je povolená."
       }
+    },
+    "selected_count": "{count, plural, one{# vybraná} few{# vybrané} many{# vybranej} other{# vybraných}}",
+    "clear_selection": "Zrušiť výber",
+    "properties": {
+      "state": "Stav",
+      "assignees": "Priradení",
+      "priority": "Priorita",
+      "start_date": "Dátum začiatku",
+      "due_date": "Termín",
+      "module": "Modul",
+      "labels": "Štítky"
+    },
+    "clear_start_date": "Vymazať dátum začiatku",
+    "clear_due_date": "Vymazať termín",
+    "toast": {
+      "success_title": "Pracovné položky aktualizované",
+      "success_message": "{count, plural, one{# pracovná položka aktualizovaná} few{# pracovné položky aktualizované} many{# pracovnej položky aktualizovanej} other{# pracovných položiek aktualizovaných}}",
+      "partial_title": "Niektoré pracovné položky neboli aktualizované",
+      "partial_message": "Aktualizované: {updated}, neaktualizované: {failed}",
+      "error_title": "Nemožno aktualizovať pracovné položky",
+      "error_message": "Niečo sa pokazilo. Žiadna pracovná položka nebola aktualizovaná."
+    },
+    "failure_reasons": {
+      "not_found": "{count, plural, one{# už nie je k dispozícii} few{# už nie sú k dispozícii} many{# už nie je k dispozícii} other{# už nie je k dispozícii}}",
+      "invalid_date_range": "{count, plural, one{# s dátumom začiatku po termíne} few{# s dátumom začiatku po termíne} many{# s dátumom začiatku po termíne} other{# s dátumom začiatku po termíne}}"
     }
   },
   "recurring_work_items": {

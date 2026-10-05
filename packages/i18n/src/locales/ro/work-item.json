@@ -326,6 +326,31 @@
         "title": "Imposibil de actualizat elementele de lucru",
         "message": "Schimbarea stării nu este permisă pentru unele elemente de lucru. Asigură-te că schimbarea stării este permisă."
       }
+    },
+    "selected_count": "{count, plural, one{# selectat} few{# selectate} other{# selectate}}",
+    "clear_selection": "Șterge selecția",
+    "properties": {
+      "state": "Stare",
+      "assignees": "Responsabili",
+      "priority": "Prioritate",
+      "start_date": "Data de început",
+      "due_date": "Data limită",
+      "module": "Modul",
+      "labels": "Etichete"
+    },
+    "clear_start_date": "Șterge data de început",
+    "clear_due_date": "Șterge data limită",
+    "toast": {
+      "success_title": "Elemente de lucru actualizate",
+      "success_message": "{count, plural, one{# element de lucru actualizat} few{# elemente de lucru actualizate} other{# de elemente de lucru actualizate}}",
+      "partial_title": "Unele elemente de lucru nu au fost actualizate",
+      "partial_message": "{updated} actualizate, {failed} neactualizate",
+      "error_title": "Imposibil de actualizat elementele de lucru",
+      "error_message": "A apărut o eroare. Niciun element de lucru nu a fost actualizat."
+    },
+    "failure_reasons": {
+      "not_found": "{count, plural, one{# nu mai este disponibil} few{# nu mai sunt disponibile} other{# nu mai sunt disponibile}}",
+      "invalid_date_range": "{count, plural, one{# cu data de început după data limită} few{# cu data de început după data limită} other{# cu data de început după data limită}}"
     }
   },
   "recurring_work_items": {

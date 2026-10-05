@@ -397,6 +397,26 @@ Add integration tests for your custom components that assert the expected props 
 
 ---
 
+### Core files touched by fork features
+
+Some fork features need a few lines in `core/` because upstream offers no `@/plane-web` hook at that point. Re-check these after every `upstream/preview` merge.
+
+**Bulk edit of work item properties (LONESTONEP-5)**
+
+| Core file                                                               | Change                                                                                           | Why                                                                     |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `core/hooks/use-bulk-operation-status.ts`                               | Re-exports `useBulkOperationStatus` from `@/plane-web/hooks/use-bulk-operation-status`           | Upstream hard-codes `() => false`, which hides the selection checkboxes |
+| `core/components/issues/issue-layouts/list/default.tsx`                 | Imports `IssueBulkOperationsRoot` from `@/plane-web/components/issues/bulk-operations`           | Upstream imports the "Upgrade" banner from `@/components`               |
+| `core/components/issues/issue-layouts/spreadsheet/spreadsheet-view.tsx` | Same import change                                                                               | Same                                                                    |
+| `core/components/gantt-chart/chart/main-content.tsx`                    | Same import change                                                                               | Same                                                                    |
+| `core/services/issue/issue.service.ts`                                  | `bulkOperations` posts to `/api/extended/.../issues/bulk-update/` and returns the typed response | The upstream endpoint only exists in the paid edition                   |
+| `core/store/issue/helpers/base-issues.store.ts`                         | `bulkUpdateProperties` applies changes to `updated_issue_ids` only and returns the response      | Issue list updates (`updateIssueList`) are internal to the base store   |
+| `core/store/issue/*/issue.store.ts`                                     | `bulkUpdateProperties` signature returns `Promise<TBulkOperationsResponse>`                      | Follows the base store change                                           |
+
+The bar itself lives in `oe/components/issues/bulk-operations/`; the backend in `plane.extended` (`issue_bulk_update` view, serializer and service).
+
+---
+
 ### Summary table
 
 | What you want to do                   | Where to write code                                                     | Upstream file touched?   |

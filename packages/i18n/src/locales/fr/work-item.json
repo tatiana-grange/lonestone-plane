@@ -326,6 +326,31 @@
         "title": "Impossible de mettre à jour les éléments de travail",
         "message": "Le changement d'état n'est pas autorisé pour certains éléments de travail. Assurez-vous que le changement d'état est autorisé."
       }
+    },
+    "selected_count": "{count, plural, one{# sélectionné} many{# sélectionnés} other{# sélectionnés}}",
+    "clear_selection": "Effacer la sélection",
+    "properties": {
+      "state": "État",
+      "assignees": "Assignés",
+      "priority": "Priorité",
+      "start_date": "Date de début",
+      "due_date": "Date d'échéance",
+      "module": "Module",
+      "labels": "Étiquettes"
+    },
+    "clear_start_date": "Effacer la date de début",
+    "clear_due_date": "Effacer la date d'échéance",
+    "toast": {
+      "success_title": "Éléments de travail mis à jour",
+      "success_message": "{count, plural, one{# élément de travail mis à jour} many{# éléments de travail mis à jour} other{# éléments de travail mis à jour}}",
+      "partial_title": "Certains éléments de travail n'ont pas été mis à jour",
+      "partial_message": "{updated} mis à jour, {failed} non mis à jour",
+      "error_title": "Impossible de mettre à jour les éléments de travail",
+      "error_message": "Une erreur s'est produite. Aucun élément de travail n'a été mis à jour."
+    },
+    "failure_reasons": {
+      "not_found": "{count, plural, one{# n'est plus disponible} many{# ne sont plus disponibles} other{# ne sont plus disponibles}}",
+      "invalid_date_range": "{count, plural, one{# avec une date de début postérieure à la date d'échéance} many{# avec une date de début postérieure à la date d'échéance} other{# avec une date de début postérieure à la date d'échéance}}"
     }
   },
   "recurring_work_items": {

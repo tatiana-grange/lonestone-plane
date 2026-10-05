@@ -24,6 +24,7 @@ import type {
   TGroupedIssueCount,
   TPaginationData,
   TBulkOperationsPayload,
+  TBulkOperationsResponse,
   IBlockUpdateDependencyData,
 } from "@plane/types";
 import { EIssueServiceType, EIssueLayoutTypes } from "@plane/types";
@@ -719,15 +720,18 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
    * @description bulk update properties of selected issues
    * @param {TBulkOperationsPayload} data
    */
-  bulkUpdateProperties = async (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => {
-    const issueIds = data.issue_ids;
+  bulkUpdateProperties = async (
+    workspaceSlug: string,
+    projectId: string,
+    data: TBulkOperationsPayload
+  ): Promise<TBulkOperationsResponse> => {
     // make request to update issue properties
-    await this.issueService.bulkOperations(workspaceSlug, projectId, data);
-    // update issues in the store
+    const response = await this.issueService.bulkOperations(workspaceSlug, projectId, data);
+    // update only the issues actually changed by the server
     runInAction(() => {
-      issueIds.forEach((issueId) => {
+      response.updated_issue_ids.forEach((issueId) => {
         const issueBeforeUpdate = clone(this.rootIssueStore.issues.getIssueById(issueId));
-        if (!issueBeforeUpdate) throw new Error("Work item not found");
+        if (!issueBeforeUpdate) return;
         Object.keys(data.properties).forEach((key) => {
           const property = key as keyof TBulkOperationsPayload["properties"];
           const propertyValue = data.properties[property];
@@ -751,6 +755,7 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
         this.updateIssueList(issueDetails, issueBeforeUpdate);
       });
     });
+    return response;
   };
 
   async updateIssueDates(

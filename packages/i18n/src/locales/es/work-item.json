@@ -326,6 +326,31 @@
         "title": "No se pueden actualizar elementos de trabajo",
         "message": "El cambio de estado no está permitido para algunos elementos de trabajo. Asegúrese de que el cambio de estado esté permitido."
       }
+    },
+    "selected_count": "{count, plural, one{# seleccionado} other{# seleccionados}}",
+    "clear_selection": "Borrar selección",
+    "properties": {
+      "state": "Estado",
+      "assignees": "Asignados",
+      "priority": "Prioridad",
+      "start_date": "Fecha de inicio",
+      "due_date": "Fecha de vencimiento",
+      "module": "Módulo",
+      "labels": "Etiquetas"
+    },
+    "clear_start_date": "Borrar fecha de inicio",
+    "clear_due_date": "Borrar fecha de vencimiento",
+    "toast": {
+      "success_title": "Elementos de trabajo actualizados",
+      "success_message": "{count, plural, one{# elemento de trabajo actualizado} other{# elementos de trabajo actualizados}}",
+      "partial_title": "Algunos elementos de trabajo no se actualizaron",
+      "partial_message": "{updated} actualizados, {failed} sin actualizar",
+      "error_title": "No se pueden actualizar elementos de trabajo",
+      "error_message": "Algo salió mal. No se actualizó ningún elemento de trabajo."
+    },
+    "failure_reasons": {
+      "not_found": "{count, plural, one{# ya no está disponible} other{# ya no están disponibles}}",
+      "invalid_date_range": "{count, plural, one{# con fecha de inicio posterior a la fecha de vencimiento} other{# con fecha de inicio posterior a la fecha de vencimiento}}"
     }
   },
   "recurring_work_items": {

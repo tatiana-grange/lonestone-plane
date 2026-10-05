@@ -13,6 +13,7 @@ import type {
   IssuePaginationOptions,
   TIssuesResponse,
   TBulkOperationsPayload,
+  TBulkOperationsResponse,
 } from "@plane/types";
 // helpers
 // base class
@@ -49,7 +50,11 @@ export interface IProjectIssues extends IBaseIssuesStore {
   quickAddIssue: (workspaceSlug: string, projectId: string, data: TIssue) => Promise<TIssue | undefined>;
   removeBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
   archiveBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
-  bulkUpdateProperties: (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => Promise<void>;
+  bulkUpdateProperties: (
+    workspaceSlug: string,
+    projectId: string,
+    data: TBulkOperationsPayload
+  ) => Promise<TBulkOperationsResponse>;
 }
 
 export class ProjectIssues extends BaseIssuesStore implements IProjectIssues {
@@ -83,7 +88,7 @@ export class ProjectIssues extends BaseIssuesStore implements IProjectIssues {
    * @param projectId
    */
   fetchParentStats = async (workspaceSlug: string, projectId?: string) => {
-    projectId && this.rootIssueStore.rootStore.projectRoot.project.fetchProjectDetails(workspaceSlug, projectId);
+    if (projectId) void this.rootIssueStore.rootStore.projectRoot.project.fetchProjectDetails(workspaceSlug, projectId);
   };
 
   /** */

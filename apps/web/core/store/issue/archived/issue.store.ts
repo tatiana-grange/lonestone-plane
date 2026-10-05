@@ -6,7 +6,14 @@
 
 import { action, makeObservable, runInAction } from "mobx";
 // base class
-import type { TLoader, IssuePaginationOptions, TIssuesResponse, ViewFlags, TBulkOperationsPayload } from "@plane/types";
+import type {
+  TLoader,
+  IssuePaginationOptions,
+  TIssuesResponse,
+  ViewFlags,
+  TBulkOperationsPayload,
+  TBulkOperationsResponse,
+} from "@plane/types";
 // services
 // types
 import type { IBaseIssuesStore } from "../helpers/base-issues.store";
@@ -38,7 +45,11 @@ export interface IArchivedIssues extends IBaseIssuesStore {
 
   restoreIssue: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
   removeBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
-  bulkUpdateProperties: (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => Promise<void>;
+  bulkUpdateProperties: (
+    workspaceSlug: string,
+    projectId: string,
+    data: TBulkOperationsPayload
+  ) => Promise<TBulkOperationsResponse>;
 
   updateIssue: undefined;
   archiveIssue: undefined;
@@ -77,7 +88,7 @@ export class ArchivedIssues extends BaseIssuesStore implements IArchivedIssues {
    * @param projectId
    */
   fetchParentStats = async (workspaceSlug: string, projectId?: string) => {
-    projectId && this.rootIssueStore.rootStore.projectRoot.project.fetchProjectDetails(workspaceSlug, projectId);
+    if (projectId) void this.rootIssueStore.rootStore.projectRoot.project.fetchProjectDetails(workspaceSlug, projectId);
   };
 
   /** */

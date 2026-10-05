@@ -326,6 +326,31 @@
         "title": "Unable to update work items",
         "message": "State change is not allowed for some work items. Ensure the state change is allowed."
       }
+    },
+    "selected_count": "{count, plural, one{# selected} other{# selected}}",
+    "clear_selection": "Clear selection",
+    "properties": {
+      "state": "State",
+      "assignees": "Assignees",
+      "priority": "Priority",
+      "start_date": "Start date",
+      "due_date": "Due date",
+      "module": "Module",
+      "labels": "Labels"
+    },
+    "clear_start_date": "Clear start date",
+    "clear_due_date": "Clear due date",
+    "toast": {
+      "success_title": "Work items updated",
+      "success_message": "{count, plural, one{# work item updated} other{# work items updated}}",
+      "partial_title": "Some work items were not updated",
+      "partial_message": "{updated} updated, {failed} not updated",
+      "error_title": "Unable to update work items",
+      "error_message": "Something went wrong. No work item was updated."
+    },
+    "failure_reasons": {
+      "not_found": "{count, plural, one{# no longer available} other{# no longer available}}",
+      "invalid_date_range": "{count, plural, one{# with start date after due date} other{# with start date after due date}}"
     }
   },
   "recurring_work_items": {

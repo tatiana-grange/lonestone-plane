@@ -3,6 +3,7 @@
 # See the LICENSE file for details.
 
 from .guest_collaboration import ProjectGuestCollaborationSerializer
+from .issue_bulk_update import BulkUpdateValidationError, IssueBulkUpdateSerializer
 from .project_template import (
     ProjectTemplateDataSerializer,
     ProjectTemplateSerializer,
@@ -14,4 +15,6 @@ __all__ = (
     "ProjectTemplateSerializer",
     "ProjectTemplateDataSerializer",
     "ProjectGuestCollaborationSerializer",
+    "IssueBulkUpdateSerializer",
+    "BulkUpdateValidationError",
 )

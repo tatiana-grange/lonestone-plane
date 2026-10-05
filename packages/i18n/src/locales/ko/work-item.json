@@ -326,6 +326,31 @@
         "title": "작업 항목을 업데이트할 수 없습니다",
         "message": "일부 작업 항목에 대해 상태 변경이 허용되지 않습니다. 상태 변경이 허용되는지 확인하세요."
       }
+    },
+    "selected_count": "{count, plural, one{#개 선택됨} other{#개 선택됨}}",
+    "clear_selection": "선택 해제",
+    "properties": {
+      "state": "상태",
+      "assignees": "담당자",
+      "priority": "우선순위",
+      "start_date": "시작 날짜",
+      "due_date": "마감일",
+      "module": "모듈",
+      "labels": "레이블"
+    },
+    "clear_start_date": "시작 날짜 지우기",
+    "clear_due_date": "마감일 지우기",
+    "toast": {
+      "success_title": "작업 항목이 업데이트되었습니다",
+      "success_message": "{count, plural, one{작업 항목 #개가 업데이트되었습니다} other{작업 항목 #개가 업데이트되었습니다}}",
+      "partial_title": "일부 작업 항목이 업데이트되지 않았습니다",
+      "partial_message": "{updated}개 업데이트됨, {failed}개 업데이트되지 않음",
+      "error_title": "작업 항목을 업데이트할 수 없습니다",
+      "error_message": "문제가 발생했습니다. 업데이트된 작업 항목이 없습니다."
+    },
+    "failure_reasons": {
+      "not_found": "{count, plural, one{#개는 더 이상 사용할 수 없음} other{#개는 더 이상 사용할 수 없음}}",
+      "invalid_date_range": "{count, plural, one{#개는 시작 날짜가 마감일보다 늦음} other{#개는 시작 날짜가 마감일보다 늦음}}"
     }
   },
   "recurring_work_items": {

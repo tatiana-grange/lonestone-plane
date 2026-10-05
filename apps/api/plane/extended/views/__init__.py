@@ -3,6 +3,7 @@
 # See the LICENSE file for details.
 
 from .guest_collaboration import ProjectGuestCollaborationEndpoint
+from .issue_bulk_update import ProjectIssueBulkUpdateEndpoint
 from .project_template import (
     ProjectTemplateApplyEndpoint,
     ProjectTemplateEndpoint,
@@ -14,4 +15,5 @@ __all__ = (
     "ProjectTemplateApplyEndpoint",
     "ProjectTemplatePreviewEndpoint",
     "ProjectGuestCollaborationEndpoint",
+    "ProjectIssueBulkUpdateEndpoint",
 )

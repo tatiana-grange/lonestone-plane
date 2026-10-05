@@ -11,6 +11,7 @@ import type {
   TIssueParams,
   IIssueDisplayProperties,
   TBulkOperationsPayload,
+  TBulkOperationsResponse,
   TIssue,
   TIssueActivity,
   TIssueLink,
@@ -336,8 +337,12 @@ export class IssueService extends APIService {
       });
   }
 
-  async bulkOperations(workspaceSlug: string, projectId: string, data: TBulkOperationsPayload): Promise<any> {
-    return this.post(`/api/workspaces/${workspaceSlug}/projects/${projectId}/bulk-operation-issues/`, data)
+  async bulkOperations(
+    workspaceSlug: string,
+    projectId: string,
+    data: TBulkOperationsPayload
+  ): Promise<TBulkOperationsResponse> {
+    return this.post(`/api/extended/workspaces/${workspaceSlug}/projects/${projectId}/issues/bulk-update/`, data)
       .then(async (response) => response?.data)
       .catch((error) => {
         throw error?.response?.data;

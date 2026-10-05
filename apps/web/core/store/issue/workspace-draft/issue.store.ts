@@ -21,6 +21,7 @@ import type {
   ViewFlags,
   TIssue,
   TBulkOperationsPayload,
+  TBulkOperationsResponse,
 } from "@plane/types";
 import { getCurrentDateTimeInISO, convertToISODateString } from "@plane/utils";
 // services
@@ -109,7 +110,11 @@ export interface IWorkspaceDraftIssues {
   archiveIssue: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
   archiveBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
   removeBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
-  bulkUpdateProperties: (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => Promise<void>;
+  bulkUpdateProperties: (
+    workspaceSlug: string,
+    projectId: string,
+    data: TBulkOperationsPayload
+  ) => Promise<TBulkOperationsResponse>;
 }
 
 export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
@@ -237,7 +242,7 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
           const newIssueIds = issueIds.filter((issueId) => !existingIssueIds.includes(issueId));
           this.addIssue(results);
           // issue map update
-          update(this.issueMapIds, [workspaceSlug], (existingIssueIds = []) => [...newIssueIds, ...existingIssueIds]);
+          update(this.issueMapIds, [workspaceSlug], (currentIssueIds = []) => [...newIssueIds, ...currentIssueIds]);
           this.loader = undefined;
         } else {
           this.loader = "empty-state";
@@ -292,7 +297,7 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
         set(this.issuesMap, [issueId], {
           ...issueBeforeUpdate,
           ...payload,
-          ...{ updated_at: getCurrentDateTimeInISO() },
+          updated_at: getCurrentDateTimeInISO(),
         });
       });
       const response = await workspaceDraftService.updateIssue(workspaceSlug, issueId, payload);
@@ -425,5 +430,9 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
   archiveIssue = async (_workspaceSlug: string, _projectId: string, _issueId: string) => {};
   archiveBulkIssues = async (_workspaceSlug: string, _projectId: string, _issueIds: string[]) => {};
   removeBulkIssues = async (_workspaceSlug: string, _projectId: string, _issueIds: string[]) => {};
-  bulkUpdateProperties = async (_workspaceSlug: string, _projectId: string, _data: TBulkOperationsPayload) => {};
+  bulkUpdateProperties = async (
+    _workspaceSlug: string,
+    _projectId: string,
+    _data: TBulkOperationsPayload
+  ): Promise<TBulkOperationsResponse> => ({ updated_issue_ids: [], unchanged_issue_ids: [], failed: [] });
 }

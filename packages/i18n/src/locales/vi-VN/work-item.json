@@ -326,6 +326,31 @@
         "title": "Không thể cập nhật mục công việc",
         "message": "Thay đổi trạng thái không được phép cho một số mục công việc. Đảm bảo thay đổi trạng thái được cho phép."
       }
+    },
+    "selected_count": "{count, plural, one{Đã chọn #} other{Đã chọn #}}",
+    "clear_selection": "Bỏ chọn",
+    "properties": {
+      "state": "Trạng thái",
+      "assignees": "Người phụ trách",
+      "priority": "Ưu tiên",
+      "start_date": "Ngày bắt đầu",
+      "due_date": "Ngày hết hạn",
+      "module": "Mô-đun",
+      "labels": "Nhãn"
+    },
+    "clear_start_date": "Xóa ngày bắt đầu",
+    "clear_due_date": "Xóa ngày hết hạn",
+    "toast": {
+      "success_title": "Đã cập nhật mục công việc",
+      "success_message": "{count, plural, one{Đã cập nhật # mục công việc} other{Đã cập nhật # mục công việc}}",
+      "partial_title": "Một số mục công việc chưa được cập nhật",
+      "partial_message": "{updated} đã cập nhật, {failed} chưa cập nhật",
+      "error_title": "Không thể cập nhật mục công việc",
+      "error_message": "Đã xảy ra lỗi. Không có mục công việc nào được cập nhật."
+    },
+    "failure_reasons": {
+      "not_found": "{count, plural, one{# mục không còn khả dụng} other{# mục không còn khả dụng}}",
+      "invalid_date_range": "{count, plural, one{# mục có ngày bắt đầu sau ngày hết hạn} other{# mục có ngày bắt đầu sau ngày hết hạn}}"
     }
   },
   "recurring_work_items": {
