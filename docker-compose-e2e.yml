@@ -1,0 +1,145 @@
+# Dedicated, throwaway backend for the web Playwright suite (apps/web-e2e).
+#
+# It is started and torn down by the suite itself (testcontainers, see
+# apps/web-e2e/tests/global-setup.ts): never point the e2e tests at the dev stack.
+#
+# Prerequisite:
+#   ./setup.sh    # creates apps/api/.env (and the other env files) from .env.example
+#
+# Notes:
+# - Separate compose project (plane-e2e) and host port (API on 8200), so it runs
+#   next to the dev stack (docker-compose-local.yml) without sharing anything.
+# - Data dirs are tmpfs: every run starts from an empty, freshly migrated database.
+# - No Celery worker: the UI flows under test do not wait on background tasks.
+
+name: plane-e2e
+
+services:
+  e2e-db:
+    image: postgres:15.7-alpine
+    networks:
+      - e2e_env
+    env_file:
+      - ./apps/api/.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-plane}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
+      POSTGRES_DB: ${POSTGRES_DB:-plane}
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-plane} -d ${POSTGRES_DB:-plane}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  e2e-redis:
+    image: valkey/valkey:7.2.11-alpine
+    networks:
+      - e2e_env
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  e2e-mq:
+    image: rabbitmq:3.13.6-management-alpine
+    networks:
+      - e2e_env
+    env_file:
+      - ./apps/api/.env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-plane}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-plane}
+    tmpfs:
+      - /var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  e2e-minio:
+    image: minio/minio
+    networks:
+      - e2e_env
+    env_file:
+      - ./apps/api/.env
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-access-key}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-secret-key}
+    command: server /export --console-address ":9090"
+    tmpfs:
+      - /export
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  e2e-api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.dev
+      args:
+        DOCKER_BUILDKIT: 1
+    networks:
+      - e2e_env
+    env_file:
+      - ./apps/api/.env
+    environment:
+      POSTGRES_HOST: e2e-db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-plane}:${POSTGRES_PASSWORD:-plane}@e2e-db:5432/${POSTGRES_DB:-plane}
+      REDIS_HOST: e2e-redis
+      REDIS_URL: redis://e2e-redis:6379/
+      RABBITMQ_HOST: e2e-mq
+      USE_MINIO: "1"
+      AWS_S3_ENDPOINT_URL: http://e2e-minio:9000
+      # The e2e web dev server (apps/web-e2e/playwright.config.ts) runs on 3200.
+      CORS_ALLOWED_ORIGINS: http://localhost:3200
+      APP_BASE_URL: http://localhost:3200
+      WEB_URL: http://localhost:8200
+      ENABLE_SIGNUP: "1"
+      ENABLE_EMAIL_PASSWORD: "1"
+    volumes:
+      - ./apps/api:/code
+    working_dir: /code
+    ports:
+      - "8200:8000"
+    depends_on:
+      e2e-db:
+        condition: service_healthy
+      e2e-redis:
+        condition: service_healthy
+      e2e-mq:
+        condition: service_healthy
+      e2e-minio:
+        condition: service_healthy
+    # Same steps as bin/docker-entrypoint-api-local.sh, plus migrations (no separate migrator).
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        python manage.py wait_for_db
+        python manage.py migrate --noinput
+        python manage.py register_instance e2e
+        python manage.py configure_instance
+        python manage.py create_bucket
+        python manage.py clear_cache
+        exec python manage.py runserver 0.0.0.0:8000 --settings=plane.settings.local --noreload
+    healthcheck:
+      test:
+        ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/instances/')"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+networks:
+  e2e_env:
+    driver: bridge

@@ -1,0 +1,25 @@
+{
+  "name": "web-e2e",
+  "version": "1.4.0",
+  "private": true,
+  "description": "Playwright end-to-end tests for the web app, run against the local dev stack",
+  "license": "AGPL-3.0",
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "check:lint": "oxlint --max-warnings=0 .",
+    "check:types": "tsc --noEmit",
+    "check:format": "oxfmt --check .",
+    "fix:lint": "oxlint --fix .",
+    "fix:format": "oxfmt .",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf test-results && rm -rf playwright-report"
+  },
+  "devDependencies": {
+    "@plane/typescript-config": "workspace:*",
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
+    "testcontainers": "catalog:",
+    "typescript": "catalog:"
+  }
+}

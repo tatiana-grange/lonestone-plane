@@ -115,7 +115,10 @@ export const IssueBulkOperationsRoot = observer(function IssueBulkOperationsRoot
   if (!isVisible || !projectId) return null;
 
   return (
-    <div className={cn("sticky bottom-0 left-0 z-[2] grid h-20 place-items-center px-3.5", className)}>
+    <div
+      data-testid="bulk-operations-bar"
+      className={cn("sticky bottom-0 left-0 z-[2] grid h-20 place-items-center px-3.5", className)}
+    >
       <div className="flex min-h-14 w-full flex-wrap items-center gap-3 rounded-md border-[0.5px] border-subtle bg-surface-1 px-3.5 py-2 shadow-raised-200">
         <span className="text-13 font-medium whitespace-nowrap text-primary">
           {t("bulk_operations.selected_count", { count: selectedEntityIds.length })}

@@ -1,0 +1,10 @@
+{
+  "extends": "@plane/typescript-config/node-library.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "incremental": false
+  },
+  "include": ["playwright.config.ts", "tests"]
+}

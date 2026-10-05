@@ -39,3 +39,15 @@ Prereq (once): `./setup.sh` — generates `apps/api/.env` from `.env.example`.
 - Teardown: `docker compose -f docker-compose-test.yml down -v`
 
 See `apps/api/tests/RUNNING_TESTS.md` for the full walkthrough and troubleshooting; see `apps/api/tests/TESTING_GUIDE.md` for test conventions and fixtures.
+
+## Frontend e2e tests (Playwright)
+
+`apps/web-e2e` drives the web app in a browser against a dedicated, throwaway backend (`docker-compose-e2e.yml`, started and removed by the suite with testcontainers; web on 3200, API on 8200). It never uses the dev stack.
+
+Prereq (once): `./setup.sh` and `pnpm --filter=web-e2e exec playwright install chromium`.
+
+- Run: `pnpm --filter=web-e2e test:e2e`
+- UI mode: `pnpm --filter=web-e2e test:e2e:ui`
+- Keep the stack between runs: `E2E_KEEP_STACK=1 pnpm --filter=web-e2e test:e2e`, then `docker compose -f docker-compose-e2e.yml down -v`
+
+See `apps/web-e2e/README.md` for fixtures and conventions.

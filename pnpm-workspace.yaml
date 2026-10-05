@@ -29,6 +29,7 @@ catalog:
   "@hocuspocus/server": "2.15.2"
   "@hocuspocus/transformer": "2.15.2"
   "@hypermod/utils": "^0.7.1"
+  "@playwright/test": "1.63.0"
   "@popperjs/core": "^2.11.8"
   "@radix-ui/react-scroll-area": "^1.2.3"
   "@react-pdf/renderer": "^4.3.0"
@@ -170,6 +171,7 @@ catalog:
   "swr": "2.2.4"
   "tailwind-merge": "3.4.0"
   "tailwindcss": "4.1.17"
+  "testcontainers": "12.2.0"
   "tippy.js": "^6.3.7"
   "tiptap-markdown": "^0.8.10"
   "tsdown": "0.16.0"
@@ -246,6 +248,9 @@ allowBuilds:
   msgpackr-extract: true
   turbo: true
   sharp: false
+  cpu-features: false
+  protobufjs: false
+  ssh2: false
 
 minimumReleaseAgeExclude:
   - '@storybook/addon-docs@10.4.6'
