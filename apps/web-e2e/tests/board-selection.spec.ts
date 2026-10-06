@@ -304,3 +304,27 @@ test.describe("board selection (keyboard and assistive technologies)", () => {
     expect(await columnCheckbox.evaluate((input) => (input as HTMLInputElement).indeterminate)).toBe(true);
   });
 });
+
+test.describe("board selection (background click)", () => {
+  test("a plain click on empty board space clears the selection, a modified one keeps it", async ({
+    page,
+    project,
+  }) => {
+    const items = await openBoard(page, project, [
+      { name: "Kept A", state: "Todo" },
+      { name: "Kept B", state: "Todo" },
+    ]);
+    // "In Progress" has no card: its column body is empty board space
+    const emptyColumn = page.locator(`[id="${stateId(project, "In Progress")}__null"]`);
+
+    await clickCard(page, items[0], ["ControlOrMeta"]);
+    await clickCard(page, items[1], ["ControlOrMeta"]);
+    await expect(bar(page)).toContainText("2 selected");
+
+    await emptyColumn.click({ modifiers: ["ControlOrMeta"] });
+    await expect(bar(page)).toContainText("2 selected");
+
+    await emptyColumn.click();
+    await expect(bar(page)).toBeHidden();
+  });
+});

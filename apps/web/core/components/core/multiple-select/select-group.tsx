@@ -9,6 +9,7 @@ import { observer } from "mobx-react";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 import { useMultipleSelect } from "@/hooks/use-multiple-select";
 // plane web hooks
+import { useClearSelectionOnBackgroundClick } from "@/plane-web/hooks/use-clear-selection-on-background-click";
 import { useSelectionShortcuts } from "@/plane-web/hooks/use-selection-shortcuts";
 
 type Props = {
@@ -29,6 +30,7 @@ export const MultipleSelectGroup = observer(function MultipleSelectGroup(props: 
     rangeScope,
   });
   useSelectionShortcuts({ helpers, disabled });
+  useClearSelectionOnBackgroundClick({ containerRef, helpers, disabled });
 
   return <>{children(helpers)}</>;
 });

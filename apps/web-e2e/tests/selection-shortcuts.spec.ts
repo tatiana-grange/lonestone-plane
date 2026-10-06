@@ -122,3 +122,19 @@ test("list: the existing checkbox and Shift + click still select ranges", async 
 
   await expect(bar(page)).toContainText("3 selected");
 });
+
+test("list: a click on the empty area below the rows clears the selection", async ({ page, project }) => {
+  const items = await openLayout(page, project, "list");
+
+  await title(page, items[0]).click({ modifiers: ["ControlOrMeta"] });
+  await title(page, items[1]).click({ modifiers: ["ControlOrMeta"] });
+  await expect(bar(page)).toContainText("2 selected");
+
+  // just below the quick-add line that follows the rows: empty list space
+  const quickAdd = await page.getByText("New work item", { exact: true }).last().boundingBox();
+  const lastRow = await item(page, items[items.length - 1]).boundingBox();
+  if (!quickAdd || !lastRow) throw new Error("List is not visible");
+  await page.mouse.click(lastRow.x + lastRow.width / 2, quickAdd.y + quickAdd.height + 40);
+
+  await expect(bar(page)).toBeHidden();
+});
