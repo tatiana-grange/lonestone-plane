@@ -331,6 +331,8 @@
     "clear_selection": "Zrušiť výber",
     "select_item": "Vybrať {identifier}",
     "select_column": "Vybrať všetko v {column}",
+    "search": "Hľadať",
+    "no_matching_values": "Žiadne zodpovedajúce hodnoty",
     "properties": {
       "state": "Stav",
       "assignees": "Priradení",

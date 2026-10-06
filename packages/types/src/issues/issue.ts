@@ -150,9 +150,16 @@ export type TBulkIssueProperties = Pick<
   | "estimate_point"
 >;
 
+// Removals for multi-value properties (assignees, labels, modules); add keys live in TBulkIssueProperties
+export type TBulkIssueRemovals = {
+  remove_assignee_ids?: string[];
+  remove_label_ids?: string[];
+  remove_module_ids?: string[];
+};
+
 export type TBulkOperationsPayload = {
   issue_ids: string[];
-  properties: Partial<TBulkIssueProperties>;
+  properties: Partial<TBulkIssueProperties> & TBulkIssueRemovals;
 };
 
 export type TBulkOperationsFailureCode = "not_found" | "invalid_date_range";

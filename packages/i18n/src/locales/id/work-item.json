@@ -331,6 +331,8 @@
     "clear_selection": "Hapus pilihan",
     "select_item": "Pilih {identifier}",
     "select_column": "Pilih semua di {column}",
+    "search": "Cari",
+    "no_matching_values": "Tidak ada nilai yang cocok",
     "properties": {
       "state": "Status",
       "assignees": "Penugas",

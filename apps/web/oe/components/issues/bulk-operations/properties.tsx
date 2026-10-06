@@ -7,20 +7,18 @@
 import { observer } from "mobx-react";
 import { useTranslation } from "@plane/i18n";
 import { CloseIcon } from "@plane/propel/icons";
-import type { TBulkIssueProperties } from "@plane/types";
+import type { TBulkOperationsPayload } from "@plane/types";
 import { renderFormattedPayloadDate } from "@plane/utils";
 import { DateDropdown } from "@/components/dropdowns/date";
-import { MemberDropdown } from "@/components/dropdowns/member/dropdown";
-import { ModuleDropdown } from "@/components/dropdowns/module/dropdown";
 import { PriorityDropdown } from "@/components/dropdowns/priority";
 import { StateDropdown } from "@/components/dropdowns/state/dropdown";
-import { IssuePropertyLabels } from "@/components/issues/issue-layouts/properties/labels";
 import { useProject } from "@/hooks/store/use-project";
+import { BulkAssigneesMenu, BulkLabelsMenu, BulkModulesMenu } from "./multi-value-menus";
 
 type Props = {
   projectId: string;
   disabled: boolean;
-  onApply: (properties: Partial<TBulkIssueProperties>) => void;
+  onApply: (properties: TBulkOperationsPayload["properties"]) => void;
 };
 
 type DateControlProps = {
@@ -78,17 +76,7 @@ export const BulkPropertiesBar = observer(function BulkPropertiesBar(props: Prop
         disabled={disabled}
         onChange={(stateId) => onApply({ state_id: stateId })}
       />
-      <MemberDropdown
-        projectId={projectId}
-        multiple
-        value={[]}
-        buttonVariant="border-with-text"
-        placeholder={t("bulk_operations.properties.assignees")}
-        disabled={disabled}
-        onChange={(assigneeIds) => {
-          if (assigneeIds.length > 0) onApply({ assignee_ids: assigneeIds });
-        }}
-      />
+      <BulkAssigneesMenu projectId={projectId} disabled={disabled} onApply={onApply} />
       <PriorityDropdown
         value={null}
         buttonVariant="border-with-text"
@@ -108,28 +96,8 @@ export const BulkPropertiesBar = observer(function BulkPropertiesBar(props: Prop
         clearLabel={t("bulk_operations.clear_due_date")}
         onChange={(date) => onApply({ target_date: date })}
       />
-      {isModuleEnabled && (
-        <ModuleDropdown
-          projectId={projectId}
-          multiple
-          value={[]}
-          buttonVariant="border-with-text"
-          placeholder={t("bulk_operations.properties.module")}
-          disabled={disabled}
-          onChange={(moduleIds) => {
-            if (moduleIds.length > 0) onApply({ module_ids: moduleIds });
-          }}
-        />
-      )}
-      <IssuePropertyLabels
-        projectId={projectId}
-        value={[]}
-        placeholderText={t("bulk_operations.properties.labels")}
-        disabled={disabled}
-        onChange={(labelIds) => {
-          if (labelIds.length > 0) onApply({ label_ids: labelIds });
-        }}
-      />
+      {isModuleEnabled && <BulkModulesMenu projectId={projectId} disabled={disabled} onApply={onApply} />}
+      <BulkLabelsMenu projectId={projectId} disabled={disabled} onApply={onApply} />
     </div>
   );
 });

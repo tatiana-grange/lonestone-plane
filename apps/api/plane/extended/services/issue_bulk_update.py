@@ -10,7 +10,7 @@ webhooks are emitted per updated issue once the transaction is committed.
 """
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
 from uuid import UUID
@@ -44,6 +44,8 @@ class Change:
     requested: dict
     current: dict
     payload: Any = None
+    # extra data some handlers need for their activities (e.g. module names)
+    meta: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -241,6 +243,42 @@ class _AddLinksHandler(BulkPropertyHandler):
         )
 
 
+class _RemoveLinksHandler(BulkPropertyHandler):
+    """Removes many-to-many links (soft delete, like Plane's own removals).
+
+    Values are not checked for eligibility: removing a value a work item does not have is a
+    no-op, and only links of the URL project's work items are touched. The activity carries the
+    full remaining set, so the history shows one "removed" entry per value.
+    """
+
+    key: str
+    link_model: type
+    link_field: str
+
+    def validate(self, value, *, project_id, slug):
+        return _parse_uuid_list(value)
+
+    def plan(self, issue, value, *, properties):
+        old = [str(link_id) for link_id in getattr(issue, self.key)]
+        removed = [link_id for link_id in value if link_id in old]
+        if not removed:
+            return None
+        return Change(
+            issue=issue,
+            requested={self.key: sorted(set(old) - set(removed))},
+            current={self.key: sorted(old)},
+            payload=removed,
+        )
+
+    def apply(self, changes, *, actor):
+        # the requested values are the same for every work item: one query for the whole batch
+        values = {link_id for change in changes for link_id in change.payload}
+        self.link_model.objects.filter(
+            issue_id__in=[change.issue.id for change in changes],
+            **{f"{self.link_field}__in": values},
+        ).delete()
+
+
 class AssigneesHandler(_AddLinksHandler):
     key = "assignee_ids"
     link_model = IssueAssignee
@@ -263,6 +301,58 @@ class AssigneesHandler(_AddLinksHandler):
                 "assignee_not_eligible", "Assignees must be active project members with at least the member role"
             )
         return user_ids
+
+
+class RemoveAssigneesHandler(_RemoveLinksHandler):
+    key = "assignee_ids"
+    link_model = IssueAssignee
+    link_field = "assignee_id"
+
+
+class RemoveLabelsHandler(_RemoveLinksHandler):
+    key = "label_ids"
+    link_model = IssueLabel
+    link_field = "label_id"
+
+
+@dataclass
+class _ModuleRemoval:
+    ids: list
+    names: dict
+
+
+class RemoveModulesHandler(_RemoveLinksHandler):
+    """Removes work items from modules; logged like Plane's module removal: one activity per module."""
+
+    key = "module_ids"
+    link_model = ModuleIssue
+    link_field = "module_id"
+
+    def validate(self, value, *, project_id, slug):
+        module_ids = super().validate(value, project_id=project_id, slug=slug)
+        names = {
+            str(module_id): name
+            for module_id, name in Module.objects.filter(pk__in=module_ids, project_id=project_id).values_list(
+                "id", "name"
+            )
+        }
+        return _ModuleRemoval(ids=module_ids, names=names)
+
+    def plan(self, issue, value, *, properties):
+        change = super().plan(issue, value.ids, properties=properties)
+        if change is not None:
+            change.meta["module_names"] = value.names
+        return change
+
+    def activities(self, change):
+        return [
+            {
+                "type": "module.activity.deleted",
+                "requested_data": json.dumps({"module_id": module_id}),
+                "current_instance": json.dumps({"module_name": change.meta["module_names"].get(module_id)}),
+            }
+            for module_id in change.payload
+        ]
 
 
 class LabelsHandler(_AddLinksHandler):
@@ -315,6 +405,9 @@ PROPERTY_HANDLERS: dict[str, BulkPropertyHandler] = {
     "assignee_ids": AssigneesHandler(),
     "label_ids": LabelsHandler(),
     "module_ids": ModulesHandler(),
+    "remove_assignee_ids": RemoveAssigneesHandler(),
+    "remove_label_ids": RemoveLabelsHandler(),
+    "remove_module_ids": RemoveModulesHandler(),
 }
 
 

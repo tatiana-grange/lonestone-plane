@@ -331,6 +331,8 @@
     "clear_selection": "Скасувати вибір",
     "select_item": "Вибрати {identifier}",
     "select_column": "Вибрати все в {column}",
+    "search": "Пошук",
+    "no_matching_values": "Немає відповідних значень",
     "properties": {
       "state": "Стан",
       "assignees": "Призначені",

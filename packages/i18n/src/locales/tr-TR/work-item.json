@@ -331,6 +331,8 @@
     "clear_selection": "Seçimi temizle",
     "select_item": "{identifier} öğesini seç",
     "select_column": "{column} içindekilerin tümünü seç",
+    "search": "Ara",
+    "no_matching_values": "Eşleşen değer yok",
     "properties": {
       "state": "Durum",
       "assignees": "Atananlar",

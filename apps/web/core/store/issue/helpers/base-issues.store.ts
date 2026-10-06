@@ -23,6 +23,8 @@ import type {
   TIssuePaginationData,
   TGroupedIssueCount,
   TPaginationData,
+  TBulkIssueProperties,
+  TBulkIssueRemovals,
   TBulkOperationsPayload,
   TBulkOperationsResponse,
   IBlockUpdateDependencyData,
@@ -54,6 +56,13 @@ export enum EIssueGroupedAction {
   DELETE = "DELETE",
   REORDER = "REORDER",
 }
+// bulk removal key -> multi-value field it removes values from
+const BULK_REMOVAL_FIELDS: Record<keyof TBulkIssueRemovals, "assignee_ids" | "label_ids" | "module_ids"> = {
+  remove_assignee_ids: "assignee_ids",
+  remove_label_ids: "label_ids",
+  remove_module_ids: "module_ids",
+};
+
 export interface IBaseIssuesStore {
   // observable
   loader: Record<string, TLoader>;
@@ -732,9 +741,20 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
       response.updated_issue_ids.forEach((issueId) => {
         const issueBeforeUpdate = clone(this.rootIssueStore.issues.getIssueById(issueId));
         if (!issueBeforeUpdate) return;
-        Object.keys(data.properties).forEach((key) => {
-          const property = key as keyof TBulkOperationsPayload["properties"];
-          const propertyValue = data.properties[property];
+        Object.entries(data.properties).forEach(([key, propertyValue]) => {
+          // removals (remove_assignee_ids, ...) target the matching multi-value field
+          const removedField = BULK_REMOVAL_FIELDS[key as keyof TBulkIssueRemovals];
+          if (removedField) {
+            const existingValue = issueBeforeUpdate[removedField];
+            const removedValues = new Set(Array.isArray(propertyValue) ? propertyValue : []);
+            this.rootIssueStore.issues.updateIssue(issueId, {
+              [removedField]: (Array.isArray(existingValue) ? existingValue : []).filter(
+                (value) => !removedValues.has(value)
+              ),
+            });
+            return;
+          }
+          const property = key as keyof TBulkIssueProperties;
           // update root issue map properties
           if (Array.isArray(propertyValue)) {
             // if property value is array, append it to the existing values

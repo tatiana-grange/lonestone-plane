@@ -678,3 +678,204 @@ class TestBulkUpdateMixedBatch:
         assert sorted(c.kwargs["model_id"] for c in model_activity.delay.call_args_list) == sorted(
             _ids([updated_a, updated_b])
         )
+
+
+@pytest.mark.contract
+class TestBulkUpdateRemovalEnvelope:
+    @pytest.mark.django_db
+    def test_empty_removal_is_invalid(self, session_client, workspace, project, issues):
+        response = _post(session_client, workspace, project, _ids(issues), {"remove_assignee_ids": []})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["code"] == "invalid_value"
+
+    @pytest.mark.django_db
+    def test_non_uuid_removal_is_invalid(self, session_client, workspace, project, issues):
+        response = _post(session_client, workspace, project, _ids(issues), {"remove_label_ids": ["not-a-uuid"]})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["code"] == "invalid_value"
+
+    @pytest.mark.django_db
+    def test_adding_and_removing_one_property_is_rejected(
+        self, session_client, workspace, project, issues, member, bob
+    ):
+        response = _post(
+            session_client,
+            workspace,
+            project,
+            _ids(issues),
+            {"assignee_ids": [str(member.id)], "remove_assignee_ids": [str(bob.id)]},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["code"] == "invalid_value"
+        assert not IssueAssignee.objects.filter(issue__in=issues).exists()
+
+    @pytest.mark.django_db
+    def test_different_properties_can_be_combined(
+        self, session_client, workspace, project, issues, front_label, member, tasks
+    ):
+        _assign(issues[0], member)
+        response = _post(
+            session_client,
+            workspace,
+            project,
+            _ids(issues),
+            {"label_ids": [str(front_label.id)], "remove_assignee_ids": [str(member.id)]},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert IssueLabel.objects.filter(label=front_label).count() == 3
+        assert _assignee_ids(issues[0]) == set()
+
+
+@pytest.mark.contract
+class TestBulkRemoveAssignees:
+    @pytest.mark.django_db
+    def test_removes_assignee_and_keeps_others(
+        self, session_client, workspace, project, issues, member, bob, tasks, django_capture_on_commit_callbacks
+    ):
+        for issue in issues[:2]:
+            _assign(issue, member)
+            _assign(issue, bob)
+        with django_capture_on_commit_callbacks(execute=True):
+            response = _post(session_client, workspace, project, _ids(issues), {"remove_assignee_ids": [str(bob.id)]})
+        assert response.status_code == status.HTTP_200_OK
+        assert sorted(response.data["updated_issue_ids"]) == sorted(_ids(issues[:2]))
+        assert response.data["unchanged_issue_ids"] == [str(issues[2].id)]
+        assert _assignee_ids(issues[0]) == {member.id}
+        assert _assignee_ids(issues[1]) == {member.id}
+
+        issue_activity, model_activity = tasks
+        calls = issue_activity.delay.call_args_list
+        assert sorted(c.kwargs["issue_id"] for c in calls) == sorted(_ids(issues[:2]))
+        for call in calls:
+            assert call.kwargs["type"] == "issue.activity.updated"
+            assert json.loads(call.kwargs["requested_data"]) == {"assignee_ids": [str(member.id)]}
+            assert json.loads(call.kwargs["current_instance"]) == {
+                "assignee_ids": sorted([str(member.id), str(bob.id)])
+            }
+            assert call.kwargs["notification"] is True
+        assert model_activity.delay.call_count == 2
+
+    @pytest.mark.django_db
+    def test_removed_links_are_soft_deleted(self, session_client, workspace, project, issues, bob, tasks):
+        _assign(issues[0], bob)
+        response = _post(
+            session_client, workspace, project, [str(issues[0].id)], {"remove_assignee_ids": [str(bob.id)]}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert IssueAssignee.all_objects.filter(issue=issues[0], assignee=bob, deleted_at__isnull=False).exists()
+
+    @pytest.mark.django_db
+    def test_removing_the_last_assignee_leaves_the_issue_unassigned(
+        self, session_client, workspace, project, issues, member, tasks
+    ):
+        _assign(issues[0], member)
+        response = _post(
+            session_client, workspace, project, [str(issues[0].id)], {"remove_assignee_ids": [str(member.id)]}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert _assignee_ids(issues[0]) == set()
+
+    @pytest.mark.django_db
+    def test_removing_a_user_outside_the_project_is_a_no_op(
+        self, session_client, workspace, project, issues, outsider, tasks
+    ):
+        response = _post(session_client, workspace, project, _ids(issues), {"remove_assignee_ids": [str(outsider.id)]})
+        assert response.status_code == status.HTTP_200_OK
+        assert sorted(response.data["unchanged_issue_ids"]) == sorted(_ids(issues))
+
+
+@pytest.mark.contract
+class TestBulkRemoveLabels:
+    @pytest.mark.django_db
+    def test_removes_label_and_keeps_others(
+        self,
+        session_client,
+        workspace,
+        project,
+        issues,
+        front_label,
+        back_label,
+        tasks,
+        django_capture_on_commit_callbacks,
+    ):
+        for issue in issues[:2]:
+            IssueLabel.objects.create(issue=issue, label=front_label, project=project, workspace=workspace)
+            IssueLabel.objects.create(issue=issue, label=back_label, project=project, workspace=workspace)
+        with django_capture_on_commit_callbacks(execute=True):
+            response = _post(
+                session_client, workspace, project, _ids(issues), {"remove_label_ids": [str(front_label.id)]}
+            )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["unchanged_issue_ids"] == [str(issues[2].id)]
+        assert not IssueLabel.objects.filter(label=front_label).exists()
+        assert IssueLabel.objects.filter(label=back_label).count() == 2
+        issue_activity, _ = tasks
+        assert (
+            _activity_payloads(issue_activity)
+            == [
+                (
+                    "issue.activity.updated",
+                    {"label_ids": [str(back_label.id)]},
+                    {"label_ids": sorted([str(front_label.id), str(back_label.id)])},
+                )
+            ]
+            * 2
+        )
+
+
+@pytest.mark.contract
+class TestBulkRemoveModules:
+    @pytest.mark.django_db
+    def test_removes_issues_from_module_and_keeps_other_modules(
+        self, session_client, workspace, project, issues, payment_module, tasks, django_capture_on_commit_callbacks
+    ):
+        other_module = Module.objects.create(name="Other", project=project, workspace=workspace)
+        for issue in issues[:2]:
+            ModuleIssue.objects.create(issue=issue, module=payment_module, project=project, workspace=workspace)
+        ModuleIssue.objects.create(issue=issues[0], module=other_module, project=project, workspace=workspace)
+
+        with django_capture_on_commit_callbacks(execute=True):
+            response = _post(
+                session_client, workspace, project, _ids(issues), {"remove_module_ids": [str(payment_module.id)]}
+            )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert sorted(response.data["updated_issue_ids"]) == sorted(_ids(issues[:2]))
+        assert not ModuleIssue.objects.filter(module=payment_module).exists()
+        assert ModuleIssue.all_objects.filter(module=payment_module, deleted_at__isnull=False).count() == 2
+        assert ModuleIssue.objects.filter(issue=issues[0], module=other_module).exists()
+
+        issue_activity, _ = tasks
+        calls = issue_activity.delay.call_args_list
+        assert sorted(c.kwargs["issue_id"] for c in calls) == sorted(_ids(issues[:2]))
+        for call in calls:
+            assert call.kwargs["type"] == "module.activity.deleted"
+            assert json.loads(call.kwargs["requested_data"]) == {"module_id": str(payment_module.id)}
+            assert json.loads(call.kwargs["current_instance"]) == {"module_name": "Paiement"}
+
+
+@pytest.mark.contract
+class TestBulkRemoveMixedBatch:
+    @pytest.mark.django_db
+    def test_partition_of_a_mixed_removal_batch(
+        self, session_client, workspace, project, issues, bob, tasks, django_capture_on_commit_callbacks
+    ):
+        without_bob, with_bob_a, with_bob_b = issues
+        _assign(with_bob_a, bob)
+        _assign(with_bob_b, bob)
+        unknown_id = str(uuid4())
+        requested = [unknown_id, *_ids([without_bob, with_bob_a, with_bob_b])]
+
+        with django_capture_on_commit_callbacks(execute=True):
+            response = _post(session_client, workspace, project, requested, {"remove_assignee_ids": [str(bob.id)]})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["failed"] == [{"issue_id": unknown_id, "code": "not_found"}]
+        assert response.data["unchanged_issue_ids"] == [str(without_bob.id)]
+        assert response.data["updated_issue_ids"] == _ids([with_bob_a, with_bob_b])
+        _assert_partition(response.data, requested)
+        issue_activity, model_activity = tasks
+        assert sorted(c.kwargs["issue_id"] for c in issue_activity.delay.call_args_list) == sorted(
+            _ids([with_bob_a, with_bob_b])
+        )
+        assert model_activity.delay.call_count == 2

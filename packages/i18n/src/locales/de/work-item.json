@@ -331,6 +331,8 @@
     "clear_selection": "Auswahl aufheben",
     "select_item": "{identifier} auswählen",
     "select_column": "Alle in {column} auswählen",
+    "search": "Suchen",
+    "no_matching_values": "Keine passenden Werte",
     "properties": {
       "state": "Status",
       "assignees": "Zugewiesene",

@@ -331,6 +331,8 @@
     "clear_selection": "Cancella selezione",
     "select_item": "Seleziona {identifier}",
     "select_column": "Seleziona tutto in {column}",
+    "search": "Cerca",
+    "no_matching_values": "Nessun valore corrispondente",
     "properties": {
       "state": "Stato",
       "assignees": "Assegnatari",

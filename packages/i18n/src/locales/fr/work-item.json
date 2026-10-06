@@ -331,6 +331,8 @@
     "clear_selection": "Effacer la sélection",
     "select_item": "Sélectionner {identifier}",
     "select_column": "Tout sélectionner dans {column}",
+    "search": "Rechercher",
+    "no_matching_values": "Aucune valeur correspondante",
     "properties": {
       "state": "État",
       "assignees": "Assignés",

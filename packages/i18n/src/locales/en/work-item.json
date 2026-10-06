@@ -331,6 +331,8 @@
     "clear_selection": "Clear selection",
     "select_item": "Select {identifier}",
     "select_column": "Select all in {column}",
+    "search": "Search",
+    "no_matching_values": "No matching values",
     "properties": {
       "state": "State",
       "assignees": "Assignees",

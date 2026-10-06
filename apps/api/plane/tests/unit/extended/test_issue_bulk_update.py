@@ -240,3 +240,28 @@ class TestDateMerge:
             create_user,
         )
         assert result["updated_issue_ids"] == [str(issue.id)]
+
+
+@pytest.mark.unit
+@pytest.mark.django_db
+class TestRemoveLinksHandler:
+    def test_one_soft_delete_query_for_the_whole_batch(self, workspace, project, create_user, tasks):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        from plane.db.models import IssueLabel, Label
+
+        label = Label.objects.create(name="front", project=project, workspace=workspace)
+        issues = [_make_issue(project, f"Work item {index}") for index in range(3)]
+        for issue in issues:
+            IssueLabel.objects.create(issue=issue, label=label, project=project, workspace=workspace)
+
+        with CaptureQueriesContext(connection) as queries:
+            result = _run(
+                workspace, project, [str(i.id) for i in issues], {"remove_label_ids": [str(label.id)]}, create_user
+            )
+
+        assert len(result["updated_issue_ids"]) == 3
+        soft_deletes = [q["sql"] for q in queries.captured_queries if q["sql"].startswith('UPDATE "issue_labels"')]
+        assert len(soft_deletes) == 1
+        assert not IssueLabel.objects.filter(label=label).exists()

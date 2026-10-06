@@ -331,6 +331,8 @@
     "clear_selection": "Wyczyść zaznaczenie",
     "select_item": "Zaznacz {identifier}",
     "select_column": "Zaznacz wszystko w {column}",
+    "search": "Szukaj",
+    "no_matching_values": "Brak pasujących wartości",
     "properties": {
       "state": "Stan",
       "assignees": "Przypisani",

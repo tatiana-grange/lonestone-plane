@@ -10,7 +10,7 @@ import { useParams } from "react-router";
 import { useTranslation } from "@plane/i18n";
 import { Button } from "@plane/propel/button";
 import { setToast, TOAST_TYPE } from "@plane/propel/toast";
-import type { TBulkIssueProperties, TBulkOperationsFailureCode, TBulkOperationsResponse } from "@plane/types";
+import type { TBulkOperationsFailureCode, TBulkOperationsPayload, TBulkOperationsResponse } from "@plane/types";
 import { cn } from "@plane/utils";
 import { useIssues } from "@/hooks/store/use-issues";
 import { useMultipleSelectStore } from "@/hooks/store/use-multiple-select-store";
@@ -71,7 +71,7 @@ export const IssueBulkOperationsRoot = observer(function IssueBulkOperationsRoot
   const { handleClearSelection } = selectionHelpers;
 
   const applyProperty = useCallback(
-    async (properties: Partial<TBulkIssueProperties>) => {
+    async (properties: TBulkOperationsPayload["properties"]) => {
       if (!workspaceSlug || !projectId || selectedEntityIds.length === 0) return;
       setIsSubmitting(true);
       try {

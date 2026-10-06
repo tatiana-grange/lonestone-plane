@@ -18,6 +18,16 @@ SUPPORTED_PROPERTIES = (
     "assignee_ids",
     "label_ids",
     "module_ids",
+    "remove_assignee_ids",
+    "remove_label_ids",
+    "remove_module_ids",
+)
+
+# add key -> removal key of the same multi-value property
+ADD_REMOVE_PAIRS = (
+    ("assignee_ids", "remove_assignee_ids"),
+    ("label_ids", "remove_label_ids"),
+    ("module_ids", "remove_module_ids"),
 )
 
 
@@ -73,6 +83,24 @@ class IssueBulkUpdateSerializer(serializers.Serializer):
         if unsupported:
             raise BulkUpdateValidationError(
                 "unsupported_property", f"Unsupported properties: {', '.join(sorted(unsupported))}"
+            )
+
+        for _, remove_key in ADD_REMOVE_PAIRS:
+            if remove_key not in properties:
+                continue
+            values = properties[remove_key]
+            if not isinstance(values, list) or not values:
+                raise BulkUpdateValidationError("invalid_value", f"{remove_key} must be a non-empty list of UUIDs")
+            for value in values:
+                try:
+                    UUID(str(value))
+                except (TypeError, ValueError):
+                    raise BulkUpdateValidationError("invalid_value", f"{remove_key} must contain UUIDs")
+
+        # one operation per property: adding and removing in one request would log two contradictory sets
+        if any(add_key in properties and remove_key in properties for add_key, remove_key in ADD_REMOVE_PAIRS):
+            raise BulkUpdateValidationError(
+                "invalid_value", "A property cannot be added and removed in the same request"
             )
 
         return {"issue_ids": issue_ids, "properties": dict(properties)}

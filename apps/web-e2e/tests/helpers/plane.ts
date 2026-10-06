@@ -33,6 +33,7 @@ export type TWorkItem = {
   target_date: string | null;
   assignee_ids: string[];
   label_ids: string[];
+  module_ids?: string[];
 };
 
 function uniqueSuffix(): string {
@@ -41,7 +42,7 @@ function uniqueSuffix(): string {
 
 async function call<T>(
   session: PlaneSession,
-  method: "GET" | "POST" | "PATCH",
+  method: "GET" | "POST" | "PATCH" | "DELETE",
   path: string,
   data?: unknown
 ): Promise<T> {
@@ -96,6 +97,9 @@ export async function createProject(session: PlaneSession, workspaceSlug: string
     name: "Bulk edit",
     identifier: "BULK",
     network: 2,
+    // features used by the bulk actions bar (module menu) and the selection rules (cycles)
+    module_view: true,
+    cycle_view: true,
   });
 }
 
@@ -137,4 +141,88 @@ export async function setProjectLayout(
   const path = `/api/workspaces/${workspaceSlug}/projects/${projectId}/user-properties/`;
   const current = await call<{ display_filters?: Record<string, unknown> }>(session, "GET", path);
   await call(session, "PATCH", path, { display_filters: { ...current.display_filters, ...displayFilters } });
+}
+
+export async function updateWorkItem(
+  session: PlaneSession,
+  workspaceSlug: string,
+  projectId: string,
+  workItemId: string,
+  data: Partial<Pick<TWorkItem, "assignee_ids" | "label_ids">>
+): Promise<void> {
+  await call(session, "PATCH", `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${workItemId}/`, data);
+}
+
+export async function deleteWorkItem(
+  session: PlaneSession,
+  workspaceSlug: string,
+  projectId: string,
+  workItemId: string
+): Promise<void> {
+  await call(session, "DELETE", `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${workItemId}/`);
+}
+
+export async function createLabel(
+  session: PlaneSession,
+  workspaceSlug: string,
+  projectId: string,
+  name: string
+): Promise<{ id: string; name: string }> {
+  return call(session, "POST", `/api/workspaces/${workspaceSlug}/projects/${projectId}/issue-labels/`, { name });
+}
+
+export async function createModule(
+  session: PlaneSession,
+  workspaceSlug: string,
+  projectId: string,
+  name: string
+): Promise<{ id: string; name: string }> {
+  return call(session, "POST", `/api/workspaces/${workspaceSlug}/projects/${projectId}/modules/`, { name });
+}
+
+export async function addModuleWorkItems(
+  session: PlaneSession,
+  workspaceSlug: string,
+  projectId: string,
+  moduleId: string,
+  issueIds: string[]
+): Promise<void> {
+  await call(session, "POST", `/api/workspaces/${workspaceSlug}/projects/${projectId}/modules/${moduleId}/issues/`, {
+    issues: issueIds,
+  });
+}
+
+/**
+ * Adds a second, freshly signed-up user to the project as a member (role 15), through the real
+ * invitation flow: workspace invite, acceptance by the invitee, then project membership.
+ * `memberRequest` must come from a separate browser context (its own cookie jar).
+ */
+export async function addProjectMember(
+  owner: PlaneSession,
+  memberRequest: APIRequestContext,
+  workspaceSlug: string,
+  projectId: string
+): Promise<{ id: string; email: string; displayName: string }> {
+  const member = await signUpFreshUser(memberRequest);
+  await call(owner, "POST", `/api/workspaces/${workspaceSlug}/invitations/`, {
+    emails: [{ email: member.email, role: 15 }],
+  });
+  const invitations = await call<{ id: string; workspace: { slug: string } }[]>(
+    member,
+    "GET",
+    "/api/users/me/workspaces/invitations/"
+  );
+  const invitation = invitations.find((candidate) => candidate.workspace?.slug === workspaceSlug) ?? invitations[0];
+  if (!invitation) throw new Error(`No workspace invitation found for ${member.email}`);
+  await call(member, "POST", "/api/users/me/workspaces/invitations/", { invitations: [invitation.id] });
+  const me = await call<{ id: string; display_name: string }>(member, "GET", "/api/users/me/");
+  await call(owner, "POST", `/api/workspaces/${workspaceSlug}/projects/${projectId}/members/`, {
+    members: [{ member_id: me.id, role: 15 }],
+  });
+  return { id: me.id, email: member.email, displayName: me.display_name };
+}
+
+export async function getCurrentUser(session: PlaneSession): Promise<{ id: string; displayName: string }> {
+  const me = await call<{ id: string; display_name: string }>(session, "GET", "/api/users/me/");
+  return { id: me.id, displayName: me.display_name };
 }

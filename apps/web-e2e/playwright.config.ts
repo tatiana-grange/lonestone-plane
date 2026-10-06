@@ -20,7 +20,8 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: "list",
-  timeout: 60_000,
+  // each test signs up a user and builds its data through the API before driving the UI
+  timeout: 90_000,
   expect: { timeout: 10_000 },
   use: {
     baseURL: WEB_URL,

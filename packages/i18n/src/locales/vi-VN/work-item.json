@@ -331,6 +331,8 @@
     "clear_selection": "Bỏ chọn",
     "select_item": "Chọn {identifier}",
     "select_column": "Chọn tất cả trong {column}",
+    "search": "Tìm kiếm",
+    "no_matching_values": "Không có giá trị phù hợp",
     "properties": {
       "state": "Trạng thái",
       "assignees": "Người phụ trách",

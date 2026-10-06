@@ -331,6 +331,8 @@
     "clear_selection": "선택 해제",
     "select_item": "{identifier} 선택",
     "select_column": "{column}의 모든 항목 선택",
+    "search": "검색",
+    "no_matching_values": "일치하는 값이 없습니다",
     "properties": {
       "state": "상태",
       "assignees": "담당자",

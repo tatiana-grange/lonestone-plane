@@ -331,6 +331,8 @@
     "clear_selection": "清除選取",
     "select_item": "選取 {identifier}",
     "select_column": "全選 {column} 中的項目",
+    "search": "搜尋",
+    "no_matching_values": "沒有相符的值",
     "properties": {
       "state": "狀態",
       "assignees": "指派對象",

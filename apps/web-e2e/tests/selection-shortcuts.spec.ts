@@ -30,7 +30,8 @@ async function openLayout(
     sub_group_by: null,
   });
   await page.goto(projectIssuesUrl(project.workspaceSlug, project.projectId));
-  await expect(item(page, items[0])).toBeVisible();
+  // first load of the layout: the dev server compiles routes on demand
+  await expect(item(page, items[0])).toBeVisible({ timeout: 30_000 });
   return items;
 }
 
