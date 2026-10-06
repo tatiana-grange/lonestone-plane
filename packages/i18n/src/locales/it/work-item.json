@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# selezionato} many{# selezionati} other{# selezionati}}",
     "clear_selection": "Cancella selezione",
+    "select_item": "Seleziona {identifier}",
+    "select_column": "Seleziona tutto in {column}",
     "properties": {
       "state": "Stato",
       "assignees": "Assegnatari",

@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{Вибрано #} few{Вибрано #} many{Вибрано #} other{Вибрано #}}",
     "clear_selection": "Скасувати вибір",
+    "select_item": "Вибрати {identifier}",
+    "select_column": "Вибрати все в {column}",
     "properties": {
       "state": "Стан",
       "assignees": "Призначені",

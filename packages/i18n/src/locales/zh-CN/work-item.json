@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{已选择 # 项} other{已选择 # 项}}",
     "clear_selection": "清除选择",
+    "select_item": "选择 {identifier}",
+    "select_column": "全选 {column} 中的项",
     "properties": {
       "state": "状态",
       "assignees": "负责人",

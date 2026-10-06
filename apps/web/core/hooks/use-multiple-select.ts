@@ -19,6 +19,8 @@ type Props = {
   containerRef: React.MutableRefObject<HTMLElement | null>;
   disabled: boolean;
   entities: Record<string, string[]>; // { groupID: entityIds[] }
+  // "group": shift + click only builds a range within one group (e.g. a board column)
+  rangeScope?: "all" | "group";
 };
 
 export type TSelectionSnapshot = {
@@ -34,10 +36,14 @@ export type TSelectionHelper = {
   handleGroupClick: (groupID: string) => void;
   isGroupSelected: (groupID: string) => "empty" | "partial" | "complete";
   isSelectionDisabled: boolean;
+  toggleEntity: (entityID: string, groupID: string) => void;
+  handleSelectAll: () => void;
+  handleGroupsSelection: (groupIDs: string[]) => void;
+  getGroupsSelectionStatus: (groupIDs: string[]) => "empty" | "partial" | "complete";
 };
 
 export const useMultipleSelect = (props: Props) => {
-  const { containerRef, disabled, entities } = props;
+  const { containerRef, disabled, entities, rangeScope = "all" } = props;
   // router
   // const router = useAppRouter();
   // store hooks
@@ -52,6 +58,7 @@ export const useMultipleSelect = (props: Props) => {
     getNextActiveEntity,
     updateNextActiveEntity,
     getLastSelectedEntityDetails,
+    updateSelectedEntityGroup,
     clearSelection,
     getIsEntitySelected,
     getIsEntityActive,
@@ -71,14 +78,13 @@ export const useMultipleSelect = (props: Props) => {
 
   const entitiesList: TEntityDetails[] = useMemo(
     () =>
-      groups
-        ?.map((groupID) =>
+      groups?.flatMap(
+        (groupID) =>
           entities?.[groupID]?.map((entityID) => ({
             entityID,
             groupID,
-          }))
-        )
-        .flat(1),
+          })) ?? []
+      ),
     [entities, groups]
   );
 
@@ -180,7 +186,6 @@ export const useMultipleSelect = (props: Props) => {
 
       if (forceAction) {
         if (forceAction === "force-add") {
-          console.log("force adding");
           updateSelectedEntityDetails(entityDetails, "add");
           handleActiveEntityChange(entityDetails, shouldScroll);
         }
@@ -218,7 +223,9 @@ export const useMultipleSelect = (props: Props) => {
     (e: React.MouseEvent, entityID: string, groupID: string) => {
       if (disabled) return;
       const lastSelectedEntityDetails = getLastSelectedEntityDetails();
-      if (e.shiftKey && lastSelectedEntityDetails) {
+      const isRangeAllowed =
+        !!lastSelectedEntityDetails && (rangeScope === "all" || lastSelectedEntityDetails.groupID === groupID);
+      if (e.shiftKey && lastSelectedEntityDetails && isRangeAllowed) {
         const currentEntityIndex = entitiesList.findIndex((entity) => entity?.entityID === entityID);
 
         const lastEntityIndex = entitiesList.findIndex(
@@ -253,7 +260,52 @@ export const useMultipleSelect = (props: Props) => {
 
       handleEntitySelection({ entityID, groupID }, false);
     },
-    [disabled, entitiesList, handleEntitySelection, getLastSelectedEntityDetails]
+    [disabled, entitiesList, handleEntitySelection, getLastSelectedEntityDetails, rangeScope]
+  );
+
+  /**
+   * @description toggle a single entity, without range or scroll (cmd/ctrl + click, "x", long press)
+   */
+  const toggleEntity = useCallback(
+    (entityID: string, groupID: string) => handleEntitySelection({ entityID, groupID }, false),
+    [handleEntitySelection]
+  );
+
+  /**
+   * @description select every displayed entity (cmd/ctrl + a)
+   */
+  const handleSelectAll = useCallback(() => {
+    if (disabled) return;
+    handleEntitySelection(entitiesList, false, "force-add");
+  }, [disabled, entitiesList, handleEntitySelection]);
+
+  /**
+   * @description selection status of the union of several groups (e.g. a board column split in swimlanes)
+   */
+  const getGroupsSelectionStatus = useCallback(
+    (groupIDs: string[]) => {
+      const groupIDSet = new Set(groupIDs);
+      const groupEntities = entitiesList.filter((entity) => groupIDSet.has(entity.groupID));
+      const totalSelected = groupEntities.filter((entity) => getIsEntitySelected(entity.entityID)).length;
+      if (totalSelected === 0) return "empty";
+      if (totalSelected === groupEntities.length) return "complete";
+      return "partial";
+    },
+    [entitiesList, getIsEntitySelected]
+  );
+
+  /**
+   * @description select every entity of several groups, or unselect them when they are all selected
+   */
+  const handleGroupsSelection = useCallback(
+    (groupIDs: string[]) => {
+      if (disabled) return;
+      const groupIDSet = new Set(groupIDs);
+      const groupEntities = entitiesList.filter((entity) => groupIDSet.has(entity.groupID));
+      const status = getGroupsSelectionStatus(groupIDs);
+      handleEntitySelection(groupEntities, false, status === "complete" ? "force-remove" : "force-add");
+    },
+    [disabled, entitiesList, getGroupsSelectionStatus, handleEntitySelection]
   );
 
   /**
@@ -372,16 +424,26 @@ export const useMultipleSelect = (props: Props) => {
   // when entities list change, remove entityIds from the selected entities array, which are not present in the new list
   useEffect(() => {
     if (disabled) return;
-    selectedEntityIds.map((entityID) => {
-      const isEntityPresent = entitiesList.find((en) => en?.entityID === entityID);
-      if (!isEntityPresent) {
-        const entityDetails = getEntityDetailsFromEntityID(entityID);
+    selectedEntityIds.forEach((entityID) => {
+      const presentEntity = entitiesList.find((en) => en?.entityID === entityID);
+      const entityDetails = getEntityDetailsFromEntityID(entityID);
+      if (!presentEntity) {
         if (entityDetails) {
           handleEntitySelection(entityDetails);
         }
+      } else if (entityDetails && entityDetails.groupID !== presentEntity.groupID) {
+        // the entity moved to another group (e.g. state change on a board): keep it selected there
+        updateSelectedEntityGroup(entityID, presentEntity.groupID);
       }
     });
-  }, [disabled, entitiesList, getEntityDetailsFromEntityID, handleEntitySelection, selectedEntityIds]);
+  }, [
+    disabled,
+    entitiesList,
+    getEntityDetailsFromEntityID,
+    handleEntitySelection,
+    selectedEntityIds,
+    updateSelectedEntityGroup,
+  ]);
 
   /**
    * @description helper functions for selection
@@ -395,6 +457,10 @@ export const useMultipleSelect = (props: Props) => {
       handleGroupClick,
       isGroupSelected,
       isSelectionDisabled: disabled,
+      toggleEntity,
+      handleSelectAll,
+      handleGroupsSelection,
+      getGroupsSelectionStatus,
     }),
     [
       clearSelection,
@@ -404,6 +470,10 @@ export const useMultipleSelect = (props: Props) => {
       handleEntityClick,
       handleGroupClick,
       isGroupSelected,
+      toggleEntity,
+      handleSelectAll,
+      handleGroupsSelection,
+      getGroupsSelectionStatus,
     ]
   );
 

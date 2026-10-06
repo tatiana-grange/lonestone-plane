@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{已選取 # 項} other{已選取 # 項}}",
     "clear_selection": "清除選取",
+    "select_item": "選取 {identifier}",
+    "select_column": "全選 {column} 中的項目",
     "properties": {
       "state": "狀態",
       "assignees": "指派對象",

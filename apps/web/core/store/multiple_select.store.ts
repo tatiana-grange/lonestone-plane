@@ -31,6 +31,7 @@ export type IMultipleSelectStore = {
   updatePreviousActiveEntity: (entityDetails: TEntityDetails | null) => void;
   updateNextActiveEntity: (entityDetails: TEntityDetails | null) => void;
   updateActiveEntityDetails: (entityDetails: TEntityDetails | null) => void;
+  updateSelectedEntityGroup: (entityID: string, groupID: string) => void;
   clearSelection: () => void;
 };
 
@@ -69,6 +70,7 @@ export class MultipleSelectStore implements IMultipleSelectStore {
       updatePreviousActiveEntity: action,
       updateNextActiveEntity: action,
       updateActiveEntityDetails: action,
+      updateSelectedEntityGroup: action,
       clearSelection: action,
     });
 
@@ -140,8 +142,8 @@ export class MultipleSelectStore implements IMultipleSelectStore {
    * @param {TEntityDetails} entityDetails
    * @param {"add" | "remove"} action
    */
-  updateSelectedEntityDetails = (entityDetails: TEntityDetails, action: "add" | "remove") => {
-    if (action === "add") {
+  updateSelectedEntityDetails = (entityDetails: TEntityDetails, selectionAction: "add" | "remove") => {
+    if (selectionAction === "add") {
       runInAction(() => {
         if (this.getIsEntitySelected(entityDetails.entityID)) {
           remove(this.selectedEntityDetails, (en) => en.entityID === entityDetails.entityID);
@@ -164,11 +166,14 @@ export class MultipleSelectStore implements IMultipleSelectStore {
    * @param {TEntityDetails[]} entitiesList
    * @param {"add" | "remove"} action
    */
-  bulkUpdateSelectedEntityDetails = (entitiesList: TEntityDetails[], action: "add" | "remove") => {
-    if (action === "add") {
+  bulkUpdateSelectedEntityDetails = (entitiesList: TEntityDetails[], selectionAction: "add" | "remove") => {
+    if (selectionAction === "add") {
       runInAction(() => {
         let newEntities: TEntityDetails[] = [];
-        newEntities = differenceWith(this.selectedEntityDetails, entitiesList, isEqual);
+        // compare by entity only: an entity already selected under another group must not be duplicated
+        newEntities = differenceWith(this.selectedEntityDetails, entitiesList, (obj1, obj2) =>
+          isEqual(obj1.entityID, obj2.entityID)
+        );
         newEntities = newEntities.concat(entitiesList);
         this.selectedEntityDetails = newEntities;
         if (entitiesList.length > 0) this.updateLastSelectedEntityDetails(entitiesList[entitiesList.length - 1]);
@@ -181,6 +186,21 @@ export class MultipleSelectStore implements IMultipleSelectStore {
         this.selectedEntityDetails = newEntities;
       });
     }
+  };
+
+  /**
+   * @description move a selected entity to the group it is now displayed in (e.g. a board card that changed column)
+   * @param {string} entityID
+   * @param {string} groupID
+   */
+  updateSelectedEntityGroup = (entityID: string, groupID: string) => {
+    runInAction(() => {
+      const entityDetails = this.selectedEntityDetails.find((en) => en.entityID === entityID);
+      if (entityDetails) entityDetails.groupID = groupID;
+      if (this.lastSelectedEntityDetails?.entityID === entityID) {
+        this.lastSelectedEntityDetails = { entityID, groupID };
+      }
+    });
   };
 
   /**

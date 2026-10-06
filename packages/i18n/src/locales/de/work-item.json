@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# ausgewählt} other{# ausgewählt}}",
     "clear_selection": "Auswahl aufheben",
+    "select_item": "{identifier} auswählen",
+    "select_column": "Alle in {column} auswählen",
     "properties": {
       "state": "Status",
       "assignees": "Zugewiesene",

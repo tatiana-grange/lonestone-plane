@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# selecionado} many{# selecionados} other{# selecionados}}",
     "clear_selection": "Limpar seleção",
+    "select_item": "Selecionar {identifier}",
+    "select_column": "Selecionar tudo em {column}",
     "properties": {
       "state": "Estado",
       "assignees": "Responsáveis",

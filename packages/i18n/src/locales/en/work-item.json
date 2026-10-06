@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# selected} other{# selected}}",
     "clear_selection": "Clear selection",
+    "select_item": "Select {identifier}",
+    "select_column": "Select all in {column}",
     "properties": {
       "state": "State",
       "assignees": "Assignees",

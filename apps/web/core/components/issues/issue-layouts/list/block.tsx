@@ -29,6 +29,8 @@ import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useProject } from "@/hooks/store/use-project";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 import { usePlatformOS } from "@/hooks/use-platform-os";
+// plane web
+import { getSelectionClickCaptureHandler } from "@/plane-web/components/issues/selection";
 import { calculateIdentifierWidth } from "../utils";
 import type { TRenderQuickActions } from "./list-view-types";
 
@@ -172,6 +174,14 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
     <ControlLink
       id={`issue-${issue.id}`}
       href={workItemLink}
+      data-selection-entity-id={issue.id}
+      data-selection-group-id={groupId}
+      onClickCapture={
+        // cmd/ctrl + click selects instead of opening a new tab (only where the row can be selected)
+        projectId && canSelectIssues && !isEpic && issue.project_id === projectId
+          ? getSelectionClickCaptureHandler(selectionHelpers, issue.id, groupId)
+          : undefined
+      }
       onClick={() => handleIssuePeekOverview(issue)}
       className="w-full cursor-pointer"
       disabled={!!issue?.tempId || issue?.is_draft}

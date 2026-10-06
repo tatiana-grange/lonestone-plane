@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# zaznaczony} few{# zaznaczone} many{# zaznaczonych} other{# zaznaczonego}}",
     "clear_selection": "Wyczyść zaznaczenie",
+    "select_item": "Zaznacz {identifier}",
+    "select_column": "Zaznacz wszystko w {column}",
     "properties": {
       "state": "Stan",
       "assignees": "Przypisani",

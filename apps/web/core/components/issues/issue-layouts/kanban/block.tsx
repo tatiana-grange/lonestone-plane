@@ -31,6 +31,14 @@ import { useKanbanView } from "@/hooks/store/use-kanban-view";
 import { useProject } from "@/hooks/store/use-project";
 import useIssuePeekOverviewRedirection from "@/hooks/use-issue-peek-overview-redirection";
 import { usePlatformOS } from "@/hooks/use-platform-os";
+// plane web
+import {
+  BoardCardSelectAction,
+  getBoardCellGroupId,
+  useBoardSelection,
+  useTouchSelection,
+} from "@/plane-web/components/issues/board-selection";
+import { getSelectionClickCaptureHandler } from "@/plane-web/components/issues/selection";
 // local components
 import type { TRenderQuickActions } from "../list/list-view-types";
 import { IssueProperties } from "../properties/all-properties";
@@ -173,6 +181,17 @@ export const KanbanIssueBlock = observer(function KanbanIssueBlock(props: IssueB
 
   const { setIsDragging: setIsKanbanDragging } = useKanbanView();
 
+  // multi-select (cmd/ctrl + click, hover checkbox, long press on touch screens)
+  const selectionHelpers = useBoardSelection();
+  const selectionGroupId = getBoardCellGroupId(groupId, subGroupId);
+  const isSelected = !!selectionHelpers?.getIsEntitySelected(issueId);
+  const handleSelectionClickCapture = getSelectionClickCaptureHandler(selectionHelpers, issueId, selectionGroupId);
+  const { onClickCapture: handleTouchClickCapture, ...touchSelectionHandlers } = useTouchSelection({
+    helpers: selectionHelpers,
+    entityID: issueId,
+    groupID: selectionGroupId,
+  });
+
   const [isDraggingOverBlock, setIsDraggingOverBlock] = useState(false);
   const [isCurrentBlockDragging, setIsCurrentBlockDragging] = useState(false);
 
@@ -242,8 +261,17 @@ export const KanbanIssueBlock = observer(function KanbanIssueBlock(props: IssueB
       <DropIndicator isVisible={!isCurrentBlockDragging && isDraggingOverBlock} />
       <div
         id={`issue-${issueId}`}
+        data-selection-entity-id={issueId}
+        data-selection-group-id={selectionGroupId}
         // make Z-index higher at the beginning of drag, to have a issue drag image of issue block without any overlaps
-        className={cn("group/kanban-block relative mb-2", { "z-[1]": isCurrentBlockDragging })}
+        className={cn("group/kanban-block relative mb-2 [-webkit-touch-callout:none]", {
+          "z-[1]": isCurrentBlockDragging,
+        })}
+        {...touchSelectionHandlers}
+        onClickCapture={(event) => {
+          handleSelectionClickCapture?.(event);
+          if (!event.isPropagationStopped()) handleTouchClickCapture?.(event);
+        }}
         onDragStart={() => {
           if (isDragAllowed) setIsCurrentBlockDragging(true);
           else {
@@ -264,7 +292,7 @@ export const KanbanIssueBlock = observer(function KanbanIssueBlock(props: IssueB
           className={cn(
             "block w-full rounded-lg border border-subtle bg-layer-2 p-3 text-13 shadow-raised-100 outline-[0.5px] outline-transparent transition-all hover:border-strong hover:shadow-raised-200",
             { "hover:cursor-pointer": isDragAllowed },
-            { "border border-accent-strong hover:border-accent-strong": getIsIssuePeeked(issue.id) },
+            { "border border-accent-strong hover:border-accent-strong": getIsIssuePeeked(issue.id) || isSelected },
             { "z-[100] bg-layer-1": isCurrentBlockDragging }
           )}
           onClick={() => handleIssuePeekOverview(issue)}
@@ -289,6 +317,12 @@ export const KanbanIssueBlock = observer(function KanbanIssueBlock(props: IssueB
             />
           </RenderIfVisible>
         </ControlLink>
+        <BoardCardSelectAction
+          issueId={issueId}
+          groupId={selectionGroupId}
+          identifier={`${projectIdentifier ?? ""}-${issue.sequence_id}`}
+          className="absolute top-1 left-1"
+        />
       </div>
     </>
   );

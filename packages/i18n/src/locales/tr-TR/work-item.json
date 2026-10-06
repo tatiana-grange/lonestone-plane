@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# seçildi} other{# seçildi}}",
     "clear_selection": "Seçimi temizle",
+    "select_item": "{identifier} öğesini seç",
+    "select_column": "{column} içindekilerin tümünü seç",
     "properties": {
       "state": "Durum",
       "assignees": "Atananlar",

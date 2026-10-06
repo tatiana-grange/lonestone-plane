@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# dipilih} other{# dipilih}}",
     "clear_selection": "Hapus pilihan",
+    "select_item": "Pilih {identifier}",
+    "select_column": "Pilih semua di {column}",
     "properties": {
       "state": "Status",
       "assignees": "Penugas",

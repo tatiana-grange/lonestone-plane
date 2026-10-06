@@ -14,7 +14,7 @@ import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-sc
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { EIssueFilterType } from "@plane/constants";
-import type { EIssuesStoreType } from "@plane/types";
+import type { EIssuesStoreType, TGroupedIssues, TSubGroupedIssues } from "@plane/types";
 import { EIssueServiceType, EIssueLayoutTypes } from "@plane/types";
 //hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
@@ -24,14 +24,19 @@ import { useProjectCollaboration } from "@/hooks/use-project-collaboration";
 import { useGroupIssuesDragNDrop } from "@/hooks/use-group-dragndrop";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import { useIssuesActions } from "@/hooks/use-issues-actions";
+import { useBulkOperationStatus } from "@/hooks/use-bulk-operation-status";
+// plane web components
+import { BoardSelectionProvider, getBoardCellGroupId } from "@/plane-web/components/issues/board-selection";
+import { IssueBulkOperationsRoot } from "@/plane-web/components/issues/bulk-operations";
 // store
 // ui
 // types
+import { MultipleSelectGroup } from "@/components/core/multiple-select";
 import { DeleteIssueModal } from "../../delete-issue-modal";
 import { IssueLayoutHOC } from "../issue-layout-HOC";
 import type { IQuickActionProps, TRenderQuickActions } from "../list/list-view-types";
 //components
-import { getSourceFromDropPayload } from "../utils";
+import { getSourceFromDropPayload, isSubGrouped } from "../utils";
 import { KanBan } from "./default";
 import { KanBanSwimLanes } from "./swimlanes";
 
@@ -110,6 +115,25 @@ export const BaseKanBanRoot = observer(function BaseKanBanRoot(props: IBaseKanBa
   );
 
   const groupedIssueIds = issues?.groupedIssueIds;
+
+  // Selection groups: one per column, or per column x swimlane cell when sub-grouped, so a shift +
+  // click range stays within a cell. Only the order of cards inside a cell matters.
+  const isBulkOperationsEnabled = useBulkOperationStatus();
+  // Built on every render, like the list layout: groupedIssueIds is a MobX object mutated in place, so
+  // a memo on its reference would keep stale groups once cards move between columns.
+  const selectionEntities: Record<string, string[]> = {};
+  if (groupedIssueIds && isSubGrouped(groupedIssueIds as TGroupedIssues)) {
+    Object.entries(groupedIssueIds as TSubGroupedIssues).forEach(([columnId, cells]) => {
+      Object.entries(cells ?? {}).forEach(([subGroupId, issueIds]) => {
+        selectionEntities[getBoardCellGroupId(columnId, subGroupId)] = [...(issueIds ?? [])];
+      });
+    });
+  } else if (groupedIssueIds) {
+    Object.entries(groupedIssueIds as TGroupedIssues).forEach(([columnId, issueIds]) => {
+      selectionEntities[getBoardCellGroupId(columnId)] = [...(issueIds ?? [])];
+    });
+  }
+  const selectionGroupIds = Object.keys(selectionEntities);
 
   const userDisplayFilters = displayFilters || null;
 
@@ -259,38 +283,52 @@ export const BaseKanBanRoot = observer(function BaseKanBanRoot(props: IBaseKanBa
         </div>
       </div>
       <IssueLayoutHOC layout={EIssueLayoutTypes.KANBAN}>
-        <div
-          className={`horizontal-scrollbar relative flex scrollbar-lg h-full w-full bg-surface-2 ${sub_group_by ? "vertical-scrollbar overflow-y-auto" : "overflow-x-auto overflow-y-hidden"}`}
-          ref={scrollableContainerRef}
+        <MultipleSelectGroup
+          containerRef={scrollableContainerRef}
+          entities={selectionEntities}
+          disabled={!isBulkOperationsEnabled || isEpic}
+          rangeScope="group"
         >
-          <div className="relative h-full w-max min-w-full bg-surface-2">
-            <div className="h-full w-max">
-              <KanBanView
-                issuesMap={issueMap}
-                groupedIssueIds={groupedIssueIds ?? {}}
-                getGroupIssueCount={issues.getGroupIssueCount}
-                displayProperties={displayProperties}
-                sub_group_by={sub_group_by}
-                group_by={group_by}
-                orderBy={orderBy}
-                updateIssue={updateIssue}
-                quickActions={renderQuickActions}
-                handleCollapsedGroups={handleCollapsedGroups}
-                collapsedGroups={collapsedGroups}
-                enableQuickIssueCreate={enableQuickAdd}
-                showEmptyGroup={userDisplayFilters?.show_empty_groups ?? true}
-                quickAddCallback={quickAddIssue}
-                disableIssueCreation={!enableIssueCreation || !isEditingAllowed || isCompletedCycle}
-                canEditProperties={canEditProperties}
-                addIssuesToView={addIssuesToView}
-                scrollableContainerRef={scrollableContainerRef}
-                handleOnDrop={handleOnDrop}
-                loadMoreIssues={fetchMoreIssues}
-                isEpic={isEpic}
-              />
-            </div>
-          </div>
-        </div>
+          {(helpers) => (
+            <BoardSelectionProvider helpers={helpers} groupIds={selectionGroupIds}>
+              <div className="relative flex h-full w-full flex-col">
+                <div
+                  className={`horizontal-scrollbar relative flex scrollbar-lg min-h-0 w-full flex-1 bg-surface-2 ${sub_group_by ? "vertical-scrollbar overflow-y-auto" : "overflow-x-auto overflow-y-hidden"}`}
+                  ref={scrollableContainerRef}
+                >
+                  <div className="relative h-full w-max min-w-full bg-surface-2">
+                    <div className="h-full w-max">
+                      <KanBanView
+                        issuesMap={issueMap}
+                        groupedIssueIds={groupedIssueIds ?? {}}
+                        getGroupIssueCount={issues.getGroupIssueCount}
+                        displayProperties={displayProperties}
+                        sub_group_by={sub_group_by}
+                        group_by={group_by}
+                        orderBy={orderBy}
+                        updateIssue={updateIssue}
+                        quickActions={renderQuickActions}
+                        handleCollapsedGroups={handleCollapsedGroups}
+                        collapsedGroups={collapsedGroups}
+                        enableQuickIssueCreate={enableQuickAdd}
+                        showEmptyGroup={userDisplayFilters?.show_empty_groups ?? true}
+                        quickAddCallback={quickAddIssue}
+                        disableIssueCreation={!enableIssueCreation || !isEditingAllowed || isCompletedCycle}
+                        canEditProperties={canEditProperties}
+                        addIssuesToView={addIssuesToView}
+                        scrollableContainerRef={scrollableContainerRef}
+                        handleOnDrop={handleOnDrop}
+                        loadMoreIssues={fetchMoreIssues}
+                        isEpic={isEpic}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <IssueBulkOperationsRoot selectionHelpers={helpers} />
+              </div>
+            </BoardSelectionProvider>
+          )}
+        </MultipleSelectGroup>
       </IssueLayoutHOC>
     </>
   );

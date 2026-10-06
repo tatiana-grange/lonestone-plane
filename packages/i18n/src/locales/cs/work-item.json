@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# vybraná} few{# vybrané} many{# vybrané} other{# vybraných}}",
     "clear_selection": "Zrušit výběr",
+    "select_item": "Vybrat {identifier}",
+    "select_column": "Vybrat vše v {column}",
     "properties": {
       "state": "Stav",
       "assignees": "Přiřazení",

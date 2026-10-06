@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{Đã chọn #} other{Đã chọn #}}",
     "clear_selection": "Bỏ chọn",
+    "select_item": "Chọn {identifier}",
+    "select_column": "Chọn tất cả trong {column}",
     "properties": {
       "state": "Trạng thái",
       "assignees": "Người phụ trách",

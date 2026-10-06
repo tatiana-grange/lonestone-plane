@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{Выбран #} few{Выбрано #} many{Выбрано #} other{Выбрано #}}",
     "clear_selection": "Снять выделение",
+    "select_item": "Выбрать {identifier}",
+    "select_column": "Выбрать всё в {column}",
     "properties": {
       "state": "Статус",
       "assignees": "Назначенные",

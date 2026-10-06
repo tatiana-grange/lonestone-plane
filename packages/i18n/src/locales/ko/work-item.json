@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{#개 선택됨} other{#개 선택됨}}",
     "clear_selection": "선택 해제",
+    "select_item": "{identifier} 선택",
+    "select_column": "{column}의 모든 항목 선택",
     "properties": {
       "state": "상태",
       "assignees": "담당자",

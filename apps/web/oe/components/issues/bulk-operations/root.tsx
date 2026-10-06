@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "react-router";
 import { useTranslation } from "@plane/i18n";
@@ -70,15 +70,6 @@ export const IssueBulkOperationsRoot = observer(function IssueBulkOperationsRoot
   const isVisible = isSelectionActive && !selectionHelpers.isSelectionDisabled && isBulkOperationsEnabled;
   const { handleClearSelection } = selectionHelpers;
 
-  useEffect(() => {
-    if (!isVisible) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") handleClearSelection();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isVisible, handleClearSelection]);
-
   const applyProperty = useCallback(
     async (properties: Partial<TBulkIssueProperties>) => {
       if (!workspaceSlug || !projectId || selectedEntityIds.length === 0) return;
@@ -120,7 +111,7 @@ export const IssueBulkOperationsRoot = observer(function IssueBulkOperationsRoot
       className={cn("sticky bottom-0 left-0 z-[2] grid h-20 place-items-center px-3.5", className)}
     >
       <div className="flex min-h-14 w-full flex-wrap items-center gap-3 rounded-md border-[0.5px] border-subtle bg-surface-1 px-3.5 py-2 shadow-raised-200">
-        <span className="text-13 font-medium whitespace-nowrap text-primary">
+        <span className="text-13 font-medium whitespace-nowrap text-primary" aria-live="polite" aria-atomic="true">
           {t("bulk_operations.selected_count", { count: selectedEntityIds.length })}
         </span>
         <Button variant="link" size="sm" onClick={handleClearSelection}>

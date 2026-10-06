@@ -107,7 +107,7 @@ export async function createWorkItem(
   session: PlaneSession,
   workspaceSlug: string,
   projectId: string,
-  data: { name: string } & Partial<Pick<TWorkItem, "start_date" | "target_date" | "state_id">>
+  data: { name: string } & Partial<Pick<TWorkItem, "start_date" | "target_date" | "state_id" | "priority">>
 ): Promise<TWorkItem> {
   return call(session, "POST", `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/`, data);
 }
@@ -119,4 +119,22 @@ export async function getWorkItem(
   workItemId: string
 ): Promise<TWorkItem> {
   return call(session, "GET", `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${workItemId}/`);
+}
+
+export type TProjectDisplayFilters = {
+  layout: "list" | "kanban" | "spreadsheet" | "gantt_chart";
+  group_by?: string | null;
+  sub_group_by?: string | null;
+};
+
+/** Sets the current user's layout (and grouping) for the project's work item views. */
+export async function setProjectLayout(
+  session: PlaneSession,
+  workspaceSlug: string,
+  projectId: string,
+  displayFilters: TProjectDisplayFilters
+): Promise<void> {
+  const path = `/api/workspaces/${workspaceSlug}/projects/${projectId}/user-properties/`;
+  const current = await call<{ display_filters?: Record<string, unknown> }>(session, "GET", path);
+  await call(session, "PATCH", path, { display_filters: { ...current.display_filters, ...displayFilters } });
 }

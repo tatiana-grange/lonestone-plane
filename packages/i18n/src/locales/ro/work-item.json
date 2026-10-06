@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{# selectat} few{# selectate} other{# selectate}}",
     "clear_selection": "Șterge selecția",
+    "select_item": "Selectează {identifier}",
+    "select_column": "Selectează tot din {column}",
     "properties": {
       "state": "Stare",
       "assignees": "Responsabili",

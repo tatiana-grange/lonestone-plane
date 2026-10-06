@@ -329,6 +329,8 @@
     },
     "selected_count": "{count, plural, one{#件を選択中} other{#件を選択中}}",
     "clear_selection": "選択を解除",
+    "select_item": "{identifier} を選択",
+    "select_column": "{column} をすべて選択",
     "properties": {
       "state": "状態",
       "assignees": "担当者",
