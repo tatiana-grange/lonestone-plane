@@ -226,11 +226,20 @@ export const useMultipleSelect = (props: Props) => {
       const isRangeAllowed =
         !!lastSelectedEntityDetails && (rangeScope === "all" || lastSelectedEntityDetails.groupID === groupID);
       if (e.shiftKey && lastSelectedEntityDetails && isRangeAllowed) {
-        const currentEntityIndex = entitiesList.findIndex((entity) => entity?.entityID === entityID);
+        // match the group too: an entity can show in several groups
+        const currentEntityIndex = entitiesList.findIndex(
+          (entity) => entity?.entityID === entityID && entity.groupID === groupID
+        );
 
         const lastEntityIndex = entitiesList.findIndex(
-          (entity) => entity?.entityID === lastSelectedEntityDetails.entityID
+          (entity) =>
+            entity?.entityID === lastSelectedEntityDetails.entityID &&
+            entity.groupID === lastSelectedEntityDetails.groupID
         );
+        if (currentEntityIndex === -1 || lastEntityIndex === -1) {
+          handleEntitySelection({ entityID, groupID }, false);
+          return;
+        }
         if (lastEntityIndex < currentEntityIndex) {
           for (let i = lastEntityIndex + 1; i <= currentEntityIndex; i++) {
             const entityDetails = entitiesList[i];
@@ -410,15 +419,16 @@ export const useMultipleSelect = (props: Props) => {
   useEffect(() => {
     if (disabled) return;
     selectedEntityIds.forEach((entityID) => {
-      const presentEntity = entitiesList.find((en) => en?.entityID === entityID);
+      // an entity can show in several groups (e.g. a board grouped by labels)
+      const presentEntities = entitiesList.filter((en) => en?.entityID === entityID);
       const entityDetails = getEntityDetailsFromEntityID(entityID);
-      if (!presentEntity) {
+      if (presentEntities.length === 0) {
         if (entityDetails) {
           handleEntitySelection(entityDetails);
         }
-      } else if (entityDetails && entityDetails.groupID !== presentEntity.groupID) {
-        // the entity moved to another group (e.g. state change on a board): keep it selected there
-        updateSelectedEntityGroup(entityID, presentEntity.groupID);
+      } else if (entityDetails && !presentEntities.some((en) => en.groupID === entityDetails.groupID)) {
+        // the entity left its group (e.g. state change on a board): keep it selected where it is now
+        updateSelectedEntityGroup(entityID, presentEntities[0].groupID);
       }
     });
   }, [

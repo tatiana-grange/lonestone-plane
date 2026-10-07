@@ -87,25 +87,40 @@ test.describe("selection of work items shown in several groups", () => {
     }
     await openLabelBoard(page, project, shared);
 
-    // anchor in the right-hand column: the card's first occurrence is in another column
-    const alphaX = (await cardIn(page, shared, alpha.id).boundingBox())?.x ?? 0;
-    const bravoX = (await cardIn(page, shared, bravo.id).boundingBox())?.x ?? 0;
-    const [groupId, others] = bravoX > alphaX ? [bravo.id, bravoItems] : [alpha.id, alphaItems];
+    // Both columns are tried: the selection keeps groups in store order, not in screen order, so only one of
+    // them holds the card's first occurrence and we cannot tell which one from the screen.
+    const columns = [
+      { groupId: alpha.id, others: alphaItems },
+      { groupId: bravo.id, others: bravoItems },
+    ];
+    for (const { groupId, others } of columns) {
+      // that column, top to bottom
+      // oxlint-disable-next-line no-await-in-loop
+      const column = await Promise.all(
+        [shared, ...others].map(async (item) => ({
+          item,
+          y: (await cardIn(page, item, groupId).boundingBox())?.y ?? 0,
+        }))
+      );
+      column.sort((a, b) => a.y - b.y);
+      const anchorIndex = column.findIndex(({ item }) => item.id === shared.id);
+      // the far end of the column from "Shared": at least two cards away with four cards
+      const targetIndex = anchorIndex < column.length / 2 ? column.length - 1 : 0;
 
-    // that column, top to bottom
-    const column = await Promise.all(
-      [shared, ...others].map(async (item) => ({ item, y: (await cardIn(page, item, groupId).boundingBox())?.y ?? 0 }))
-    );
-    column.sort((a, b) => a.y - b.y);
-    const anchorIndex = column.findIndex(({ item }) => item.id === shared.id);
-    // the far end of the column from "Shared": at least two cards away with four cards
-    const targetIndex = anchorIndex < column.length / 2 ? column.length - 1 : 0;
+      // oxlint-disable-next-line no-await-in-loop
+      await clickCardIn(page, shared, groupId, ["ControlOrMeta"]);
+      // oxlint-disable-next-line no-await-in-loop
+      await expect(bar(page)).toContainText("1 selected");
+      // oxlint-disable-next-line no-await-in-loop
+      await clickCardIn(page, column[targetIndex].item, groupId, ["Shift"]);
 
-    await clickCardIn(page, shared, groupId, ["ControlOrMeta"]);
-    await expect(bar(page)).toContainText("1 selected");
-    await clickCardIn(page, column[targetIndex].item, groupId, ["Shift"]);
-
-    await expect(bar(page)).toContainText(`${Math.abs(targetIndex - anchorIndex) + 1} selected`);
+      // oxlint-disable-next-line no-await-in-loop
+      await expect(bar(page)).toContainText(`${Math.abs(targetIndex - anchorIndex) + 1} selected`);
+      // oxlint-disable-next-line no-await-in-loop
+      await page.keyboard.press("Escape");
+      // oxlint-disable-next-line no-await-in-loop
+      await expect(bar(page)).toBeHidden();
+    }
   });
 
   test("Cmd/Ctrl + A counts a work item shown in two columns once", async ({ page, project }) => {
