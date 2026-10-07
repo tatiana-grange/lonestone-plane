@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{# už nie je k dispozícii} few{# už nie sú k dispozícii} many{# už nie je k dispozícii} other{# už nie je k dispozícii}}",
-      "invalid_date_range": "{count, plural, one{# s dátumom začiatku po termíne} few{# s dátumom začiatku po termíne} many{# s dátumom začiatku po termíne} other{# s dátumom začiatku po termíne}}"
+      "invalid_date_range": "{count, plural, one{# s dátumom začiatku po termíne} few{# s dátumom začiatku po termíne} many{# s dátumom začiatku po termíne} other{# s dátumom začiatku po termíne}}",
+      "request_failed": "{count, plural, one{# neodoslaná pre chybu} few{# neodoslané pre chybu} many{# neodoslaných pre chybu} other{# neodoslaných pre chybu}}"
     }
   },
   "recurring_work_items": {

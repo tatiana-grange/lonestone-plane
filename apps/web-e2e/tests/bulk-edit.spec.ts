@@ -116,4 +116,56 @@ test.describe("bulk edit work items (list layout)", () => {
       expect(updated.target_date).toBe(firstOfMonth);
     }
   });
+
+  test("a failure after a first batch of 500 reports the work items already updated", async ({ page, project }) => {
+    test.setTimeout(300_000);
+    const total = 501;
+    const inProgress = project.states.find((state) => state.name === "In Progress");
+    expect(inProgress).toBeDefined();
+    const names = Array.from({ length: total }, (_, index) => `Batch item ${index + 1}`);
+    for (let start = 0; start < names.length; start += 25) {
+      // small parallel waves: one by one would take minutes, all at once overloads the API
+      // oxlint-disable-next-line no-await-in-loop
+      await Promise.all(
+        names
+          .slice(start, start + 25)
+          .map((name) => createWorkItem(project.session, project.workspaceSlug, project.projectId, { name }))
+      );
+    }
+
+    // the first request goes through, the second one fails
+    const sentBatches: string[][] = [];
+    await page.route("**/issues/bulk-update/", async (route) => {
+      sentBatches.push((route.request().postDataJSON() as { issue_ids: string[] }).issue_ids);
+      if (sentBatches.length === 1) await route.continue();
+      else await route.fulfill({ status: 500, json: {} });
+    });
+
+    await openIssueList(page, project);
+    const bar = page.getByTestId("bulk-operations-bar");
+    // the list loads 100 work items at a time while scrolling: Cmd/Ctrl + A only selects loaded ones
+    await page.locator("[data-selection-entity-id]").first().hover();
+    await expect(async () => {
+      await page.mouse.wheel(0, 20_000);
+      await page.keyboard.press("ControlOrMeta+a");
+      await expect(bar).toContainText(`${total} selected`, { timeout: 2_000 });
+    }).toPass({ timeout: 120_000 });
+
+    await barDropdown(page, "State").click();
+    await page.getByRole("option", { name: "In Progress" }).click();
+
+    await expect(page.getByText(/Unable to update work items|Some work items were not updated/)).toBeVisible();
+    expect(sentBatches.map((batch) => batch.length)).toEqual([500, 1]);
+    // the first batch is saved on the server...
+    const firstBatch = await Promise.all(
+      sentBatches[0]
+        .slice(0, 20)
+        .map((id) => getWorkItem(project.session, project.workspaceSlug, project.projectId, id))
+    );
+    for (const item of firstBatch) expect(item.state_id).toBe(inProgress?.id);
+    // ...so the toast reports the 500 updated work items
+    const toast = page.getByText("500 updated, 1 not updated");
+    await expect(toast).toBeVisible();
+    await expect(toast).toContainText("1 not sent after an error");
+  });
 });

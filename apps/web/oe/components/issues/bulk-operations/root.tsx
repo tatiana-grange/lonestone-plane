@@ -29,10 +29,13 @@ type Props = {
 
 type TTranslate = ReturnType<typeof useTranslation>["t"];
 
-const showBulkResultToast = (response: TBulkOperationsResponse, t: TTranslate) => {
+/**
+ * @param notSentCount work items of the batches that were not sent because an earlier batch request failed
+ */
+const showBulkResultToast = (response: TBulkOperationsResponse, t: TTranslate, notSentCount = 0) => {
   const updated = response.updated_issue_ids.length + response.unchanged_issue_ids.length;
 
-  if (response.failed.length === 0) {
+  if (response.failed.length === 0 && notSentCount === 0) {
     setToast({
       type: TOAST_TYPE.SUCCESS,
       title: t("bulk_operations.toast.success_title"),
@@ -44,14 +47,14 @@ const showBulkResultToast = (response: TBulkOperationsResponse, t: TTranslate) =
   const countsByCode = new Map<TBulkOperationsFailureCode, number>();
   for (const { code } of response.failed) countsByCode.set(code, (countsByCode.get(code) ?? 0) + 1);
   const reasons = [...countsByCode].map(([code, count]) => t(`bulk_operations.failure_reasons.${code}`, { count }));
+  if (notSentCount > 0) reasons.push(t("bulk_operations.failure_reasons.request_failed", { count: notSentCount }));
+  const failed = response.failed.length + notSentCount;
 
   setToast({
     type: TOAST_TYPE.WARNING,
     title: t("bulk_operations.toast.partial_title"),
     // toasts render plain text on one line, so reasons are joined inline
-    message: [t("bulk_operations.toast.partial_message", { updated, failed: response.failed.length }), ...reasons].join(
-      " · "
-    ),
+    message: [t("bulk_operations.toast.partial_message", { updated, failed }), ...reasons].join(" · "),
   });
 };
 
@@ -74,21 +77,31 @@ export const IssueBulkOperationsRoot = observer(function IssueBulkOperationsRoot
     async (properties: TBulkOperationsPayload["properties"]) => {
       if (!workspaceSlug || !projectId || selectedEntityIds.length === 0) return;
       setIsSubmitting(true);
+      // a copy: each batch updates the store, which can drop work items from the view and so from the selection
+      const issueIds = [...selectedEntityIds];
+      const response: TBulkOperationsResponse = { updated_issue_ids: [], unchanged_issue_ids: [], failed: [] };
+      let sentCount = 0;
       try {
-        const response: TBulkOperationsResponse = { updated_issue_ids: [], unchanged_issue_ids: [], failed: [] };
-        for (let index = 0; index < selectedEntityIds.length; index += BULK_CHUNK_SIZE) {
+        for (let index = 0; index < issueIds.length; index += BULK_CHUNK_SIZE) {
+          const chunkIds = issueIds.slice(index, index + BULK_CHUNK_SIZE);
           // sequential on purpose: chunks are rare and each one updates the store
           // oxlint-disable-next-line no-await-in-loop
           const chunk = await issues.bulkUpdateProperties(workspaceSlug, projectId, {
-            issue_ids: selectedEntityIds.slice(index, index + BULK_CHUNK_SIZE),
+            issue_ids: chunkIds,
             properties,
           });
           response.updated_issue_ids.push(...chunk.updated_issue_ids);
           response.unchanged_issue_ids.push(...chunk.unchanged_issue_ids);
           response.failed.push(...chunk.failed);
+          sentCount += chunkIds.length;
         }
         showBulkResultToast(response, t);
       } catch (error) {
+        if (sentCount > 0) {
+          // the earlier batches are saved and already in the store: report them with the ones not sent
+          showBulkResultToast(response, t, issueIds.length - sentCount);
+          return;
+        }
         // nothing was applied to the store: it is only updated after a successful response
         setToast({
           type: TOAST_TYPE.ERROR,

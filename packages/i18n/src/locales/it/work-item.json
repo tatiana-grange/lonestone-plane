@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{# non più disponibile} many{# non più disponibili} other{# non più disponibili}}",
-      "invalid_date_range": "{count, plural, one{# con data di inizio successiva alla scadenza} many{# con data di inizio successiva alla scadenza} other{# con data di inizio successiva alla scadenza}}"
+      "invalid_date_range": "{count, plural, one{# con data di inizio successiva alla scadenza} many{# con data di inizio successiva alla scadenza} other{# con data di inizio successiva alla scadenza}}",
+      "request_failed": "{count, plural, one{# non inviato dopo un errore} many{# non inviati dopo un errore} other{# non inviati dopo un errore}}"
     }
   },
   "recurring_work_items": {

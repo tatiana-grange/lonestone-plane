@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{# artık kullanılamıyor} other{# artık kullanılamıyor}}",
-      "invalid_date_range": "{count, plural, one{# öğenin başlangıç tarihi son tarihten sonra} other{# öğenin başlangıç tarihi son tarihten sonra}}"
+      "invalid_date_range": "{count, plural, one{# öğenin başlangıç tarihi son tarihten sonra} other{# öğenin başlangıç tarihi son tarihten sonra}}",
+      "request_failed": "{count, plural, one{# bir hata nedeniyle gönderilmedi} other{# bir hata nedeniyle gönderilmedi}}"
     }
   },
   "recurring_work_items": {

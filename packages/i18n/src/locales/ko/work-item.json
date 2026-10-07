@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{#개는 더 이상 사용할 수 없음} other{#개는 더 이상 사용할 수 없음}}",
-      "invalid_date_range": "{count, plural, one{#개는 시작 날짜가 마감일보다 늦음} other{#개는 시작 날짜가 마감일보다 늦음}}"
+      "invalid_date_range": "{count, plural, one{#개는 시작 날짜가 마감일보다 늦음} other{#개는 시작 날짜가 마감일보다 늦음}}",
+      "request_failed": "{count, plural, one{#개는 오류로 인해 전송되지 않음} other{#개는 오류로 인해 전송되지 않음}}"
     }
   },
   "recurring_work_items": {

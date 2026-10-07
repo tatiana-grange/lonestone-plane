@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{# nu mai este disponibil} few{# nu mai sunt disponibile} other{# nu mai sunt disponibile}}",
-      "invalid_date_range": "{count, plural, one{# cu data de început după data limită} few{# cu data de început după data limită} other{# cu data de început după data limită}}"
+      "invalid_date_range": "{count, plural, one{# cu data de început după data limită} few{# cu data de început după data limită} other{# cu data de început după data limită}}",
+      "request_failed": "{count, plural, one{# netrimis din cauza unei erori} few{# netrimise din cauza unei erori} other{# netrimise din cauza unei erori}}"
     }
   },
   "recurring_work_items": {

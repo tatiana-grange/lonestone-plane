@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{# no longer available} other{# no longer available}}",
-      "invalid_date_range": "{count, plural, one{# with start date after due date} other{# with start date after due date}}"
+      "invalid_date_range": "{count, plural, one{# with start date after due date} other{# with start date after due date}}",
+      "request_failed": "{count, plural, one{# not sent after an error} other{# not sent after an error}}"
     }
   },
   "recurring_work_items": {

@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{# mục không còn khả dụng} other{# mục không còn khả dụng}}",
-      "invalid_date_range": "{count, plural, one{# mục có ngày bắt đầu sau ngày hết hạn} other{# mục có ngày bắt đầu sau ngày hết hạn}}"
+      "invalid_date_range": "{count, plural, one{# mục có ngày bắt đầu sau ngày hết hạn} other{# mục có ngày bắt đầu sau ngày hết hạn}}",
+      "request_failed": "{count, plural, one{# mục chưa được gửi do lỗi} other{# mục chưa được gửi do lỗi}}"
     }
   },
   "recurring_work_items": {

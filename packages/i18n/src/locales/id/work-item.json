@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{# tidak lagi tersedia} other{# tidak lagi tersedia}}",
-      "invalid_date_range": "{count, plural, one{# dengan tanggal mulai setelah tanggal jatuh tempo} other{# dengan tanggal mulai setelah tanggal jatuh tempo}}"
+      "invalid_date_range": "{count, plural, one{# dengan tanggal mulai setelah tanggal jatuh tempo} other{# dengan tanggal mulai setelah tanggal jatuh tempo}}",
+      "request_failed": "{count, plural, one{# tidak terkirim setelah terjadi kesalahan} other{# tidak terkirim setelah terjadi kesalahan}}"
     }
   },
   "recurring_work_items": {

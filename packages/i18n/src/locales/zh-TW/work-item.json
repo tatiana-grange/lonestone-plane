@@ -343,7 +343,8 @@
     },
     "failure_reasons": {
       "not_found": "{count, plural, one{# 個已無法使用} other{# 個已無法使用}}",
-      "invalid_date_range": "{count, plural, one{# 個的開始日期晚於截止日期} other{# 個的開始日期晚於截止日期}}"
+      "invalid_date_range": "{count, plural, one{# 個的開始日期晚於截止日期} other{# 個的開始日期晚於截止日期}}",
+      "request_failed": "{count, plural, one{# 個因發生錯誤未送出} other{# 個因發生錯誤未送出}}"
     }
   },
   "recurring_work_items": {
