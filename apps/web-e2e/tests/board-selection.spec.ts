@@ -188,6 +188,28 @@ test.describe("board selection (touch)", () => {
     await card(page, items[1]).getByText(items[1].name, { exact: true }).tap();
     await expect(peek(page)).toBeVisible();
   });
+
+  test("while selecting, a tap on a card control opens it instead of toggling the card", async ({ page, project }) => {
+    const items = await openBoard(page, project, [
+      { name: "Pressed", state: "Todo" },
+      { name: "Controlled", state: "Todo" },
+    ]);
+
+    await longPress(card(page, items[0]).getByText(items[0].name, { exact: true }));
+    await expect(bar(page)).toContainText("1 selected");
+
+    await card(page, items[1]).getByRole("button", { name: "Todo" }).first().tap();
+    await expect(page.getByRole("option", { name: "In Progress" })).toBeVisible();
+    await expect(bar(page)).toContainText("1 selected");
+
+    await page.getByRole("option", { name: "In Progress" }).tap();
+    await expect
+      .poll(
+        async () => (await getWorkItem(project.session, project.workspaceSlug, project.projectId, items[1].id)).state_id
+      )
+      .toBe(stateId(project, "In Progress"));
+    await expect(bar(page)).toContainText("1 selected");
+  });
 });
 
 test.describe("board selection (ranges and columns)", () => {

@@ -779,12 +779,8 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
         response.updated_issue_ids.forEach((issueId) => this.removeIssueFromList(issueId));
       }
     });
-    // module changes affect the current module's stats
-    if (
-      this.moduleId &&
-      (data.properties.module_ids?.includes(this.moduleId) ||
-        data.properties.remove_module_ids?.includes(this.moduleId))
-    ) {
+    // in a cycle or module view, any change (state, dates, module...) can affect its progress stats
+    if (response.updated_issue_ids.length > 0 && (this.cycleId || this.moduleId)) {
       this.fetchParentStats(workspaceSlug, projectId);
     }
     return response;

@@ -247,3 +247,37 @@ test.describe("timelines without work items", () => {
     await expect(bar(page)).toBeHidden();
   });
 });
+
+test.describe("module progress after a bulk change", () => {
+  test("a bulk state change updates the module progress without a reload", async ({ page, project }) => {
+    const items = await createWorkItems(project, ["Progress A", "Progress B"]);
+    const module = await createModule(project.session, project.workspaceSlug, project.projectId, "Livraison");
+    await addModuleWorkItems(
+      project.session,
+      project.workspaceSlug,
+      project.projectId,
+      module.id,
+      items.map((item) => item.id)
+    );
+    const row = (item: TWorkItem) => page.locator(`[data-selection-entity-id="${item.id}"]`).first();
+
+    // the module sidebar would cover the bulk operations bar: it is opened once the change is done
+    await page.addInitScript(() => window.localStorage.setItem("module_sidebar_collapsed", JSON.stringify("true")));
+    await page.goto(moduleIssuesUrl(project.workspaceSlug, project.projectId, module.id));
+    await expect(row(items[0])).toBeVisible({ timeout: 30_000 });
+    for (const item of items) {
+      // oxlint-disable-next-line no-await-in-loop
+      await row(item)
+        .getByText(item.name, { exact: true })
+        .click({ modifiers: ["ControlOrMeta"] });
+    }
+    await expect(bar(page)).toContainText("2 selected");
+
+    await bar(page).getByRole("button", { name: "State", exact: true }).first().click();
+    await page.getByRole("option", { name: "Done" }).click();
+    await expect(page.getByText("2 work items updated")).toBeVisible();
+
+    await page.locator("button:has(svg.lucide-panel-right)").click();
+    await expect(page.getByText("2/2", { exact: true })).toBeVisible();
+  });
+});

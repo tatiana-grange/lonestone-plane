@@ -12,6 +12,9 @@ import { toggleEntity } from "@/plane-web/components/issues/selection/actions";
 
 const LONG_PRESS_MS = 500;
 const MOVE_TOLERANCE_PX = 10;
+// controls inside a card (property dropdowns, quick actions, the menus they open) keep their own tap
+const INTERACTIVE_SELECTOR =
+  "button, input, select, textarea, [contenteditable='true'], [role='button'], [role='checkbox'], [role='menuitem'], [role='option']";
 
 type TouchSelectionHandlers = {
   onPointerDown?: (event: PointerEvent) => void;
@@ -25,7 +28,8 @@ type TouchSelectionHandlers = {
 /**
  * Touch selection for board cards (no hover, so no checkbox):
  * - a long press (about 500 ms without moving) toggles the card instead of opening it;
- * - while a selection is active, a tap toggles the card instead of opening it.
+ * - while a selection is active, a tap toggles the card instead of opening it, except on the card's
+ *   controls (state, assignees, "..." menu), which keep working.
  * Moving the finger cancels the long press, so scrolling stays free.
  */
 export const useTouchSelection = (params: {
@@ -80,7 +84,8 @@ export const useTouchSelection = (params: {
         event.stopPropagation();
         return;
       }
-      if (lastPointerTypeRef.current === "touch" && isSelectionActive) {
+      const isOnControl = event.target instanceof Element && !!event.target.closest(INTERACTIVE_SELECTOR);
+      if (lastPointerTypeRef.current === "touch" && isSelectionActive && !isOnControl) {
         event.preventDefault();
         event.stopPropagation();
         toggleEntity(helpers, entityID, groupID);
