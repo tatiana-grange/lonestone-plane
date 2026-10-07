@@ -331,17 +331,6 @@
     "clear_selection": "Auswahl aufheben",
     "select_item": "{identifier} auswählen",
     "select_column": "Alle in {column} auswählen",
-    "search": "Suchen",
-    "no_matching_values": "Keine passenden Werte",
-    "properties": {
-      "state": "Status",
-      "assignees": "Zugewiesene",
-      "priority": "Priorität",
-      "start_date": "Startdatum",
-      "due_date": "Fälligkeitsdatum",
-      "module": "Modul",
-      "labels": "Labels"
-    },
     "clear_start_date": "Startdatum löschen",
     "clear_due_date": "Fälligkeitsdatum löschen",
     "toast": {

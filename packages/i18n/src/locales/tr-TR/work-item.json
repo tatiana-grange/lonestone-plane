@@ -331,17 +331,6 @@
     "clear_selection": "Seçimi temizle",
     "select_item": "{identifier} öğesini seç",
     "select_column": "{column} içindekilerin tümünü seç",
-    "search": "Ara",
-    "no_matching_values": "Eşleşen değer yok",
-    "properties": {
-      "state": "Durum",
-      "assignees": "Atananlar",
-      "priority": "Öncelik",
-      "start_date": "Başlangıç tarihi",
-      "due_date": "Son tarih",
-      "module": "Modül",
-      "labels": "Etiketler"
-    },
     "clear_start_date": "Başlangıç tarihini temizle",
     "clear_due_date": "Son tarihi temizle",
     "toast": {

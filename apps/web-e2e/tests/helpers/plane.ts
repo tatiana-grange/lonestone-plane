@@ -201,9 +201,11 @@ export async function addProjectMember(
   owner: PlaneSession,
   memberRequest: APIRequestContext,
   workspaceSlug: string,
-  projectId: string
+  projectId: string,
+  profile: { first_name?: string; last_name?: string } = {}
 ): Promise<{ id: string; email: string; displayName: string }> {
   const member = await signUpFreshUser(memberRequest);
+  if (Object.keys(profile).length > 0) await call(member, "PATCH", "/api/users/me/", profile);
   await call(owner, "POST", `/api/workspaces/${workspaceSlug}/invitations/`, {
     emails: [{ email: member.email, role: 15 }],
   });

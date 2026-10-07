@@ -231,9 +231,10 @@ test.describe("board selection (ranges and columns)", () => {
       await backlogCheckbox.evaluate((input) => (input as unknown as { indeterminate: boolean }).indeterminate)
     ).toBe(true);
 
-    await backlogCheckbox.click();
+    // same rule as the list layout: a partial column is unselected
     await backlogCheckbox.click();
     await expect(bar(page)).toContainText("1 selected");
+    await expect(backlogCheckbox).not.toBeChecked();
   });
 
   test("with swimlanes, the column checkbox covers every row and ranges stay in a cell", async ({ page, project }) => {

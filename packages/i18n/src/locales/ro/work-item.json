@@ -331,17 +331,6 @@
     "clear_selection": "Șterge selecția",
     "select_item": "Selectează {identifier}",
     "select_column": "Selectează tot din {column}",
-    "search": "Caută",
-    "no_matching_values": "Nicio valoare potrivită",
-    "properties": {
-      "state": "Stare",
-      "assignees": "Responsabili",
-      "priority": "Prioritate",
-      "start_date": "Data de început",
-      "due_date": "Data limită",
-      "module": "Modul",
-      "labels": "Etichete"
-    },
     "clear_start_date": "Șterge data de început",
     "clear_due_date": "Șterge data limită",
     "toast": {

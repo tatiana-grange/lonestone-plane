@@ -13,3 +13,7 @@ export const WEB_URL = "http://localhost:3200";
 export function projectIssuesUrl(workspaceSlug: string, projectId: string): string {
   return `/${workspaceSlug}/projects/${projectId}/issues`;
 }
+
+export function moduleIssuesUrl(workspaceSlug: string, projectId: string, moduleId: string): string {
+  return `/${workspaceSlug}/projects/${projectId}/modules/${moduleId}`;
+}

@@ -34,10 +34,6 @@ export const BoardColumnSelectAction = observer(function BoardColumnSelectAction
         iconClassName="size-3"
         checked={status === "complete"}
         indeterminate={status === "partial"}
-        // expose the partial state on the native input too (assistive technologies, :indeterminate)
-        ref={(input) => {
-          if (input) input.indeterminate = status === "partial";
-        }}
         aria-label={t("bulk_operations.select_column", { column: columnTitle })}
         readOnly
         onClick={(event) => {

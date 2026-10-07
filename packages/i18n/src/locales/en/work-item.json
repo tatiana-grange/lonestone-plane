@@ -331,17 +331,6 @@
     "clear_selection": "Clear selection",
     "select_item": "Select {identifier}",
     "select_column": "Select all in {column}",
-    "search": "Search",
-    "no_matching_values": "No matching values",
-    "properties": {
-      "state": "State",
-      "assignees": "Assignees",
-      "priority": "Priority",
-      "start_date": "Start date",
-      "due_date": "Due date",
-      "module": "Module",
-      "labels": "Labels"
-    },
     "clear_start_date": "Clear start date",
     "clear_due_date": "Clear due date",
     "toast": {

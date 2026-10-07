@@ -17,9 +17,12 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return !!target.closest('[contenteditable="true"], .ProseMirror');
 }
 
-/** An open dialog, menu or listbox handles the keyboard first (Escape closes it before clearing the selection). */
+/**
+ * An open dialog, menu, listbox or floating work item peek handles the keyboard first
+ * (Escape closes it before clearing the selection).
+ */
 function isOverlayOpen(): boolean {
-  return !!document.querySelector('[role="dialog"], [role="menu"], [role="listbox"]');
+  return !!document.querySelector('[role="dialog"], [role="menu"], [role="listbox"], [data-selection-overlay]');
 }
 
 /**

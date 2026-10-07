@@ -72,7 +72,7 @@ export const BulkPropertiesBar = observer(function BulkPropertiesBar(props: Prop
         value={null}
         showDefaultState={false}
         buttonVariant="border-with-text"
-        placeholder={t("bulk_operations.properties.state")}
+        placeholder={t("state")}
         disabled={disabled}
         onChange={(stateId) => onApply({ state_id: stateId })}
       />
@@ -80,19 +80,19 @@ export const BulkPropertiesBar = observer(function BulkPropertiesBar(props: Prop
       <PriorityDropdown
         value={null}
         buttonVariant="border-with-text"
-        placeholder={t("bulk_operations.properties.priority")}
+        placeholder={t("priority")}
         disabled={disabled}
         onChange={(priority) => onApply({ priority })}
       />
       <BulkDateControl
         disabled={disabled}
-        placeholder={t("bulk_operations.properties.start_date")}
+        placeholder={t("start_date")}
         clearLabel={t("bulk_operations.clear_start_date")}
         onChange={(date) => onApply({ start_date: date })}
       />
       <BulkDateControl
         disabled={disabled}
-        placeholder={t("bulk_operations.properties.due_date")}
+        placeholder={t("due_date")}
         clearLabel={t("bulk_operations.clear_due_date")}
         onChange={(date) => onApply({ target_date: date })}
       />

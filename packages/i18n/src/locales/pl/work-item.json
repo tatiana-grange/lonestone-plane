@@ -331,17 +331,6 @@
     "clear_selection": "Wyczyść zaznaczenie",
     "select_item": "Zaznacz {identifier}",
     "select_column": "Zaznacz wszystko w {column}",
-    "search": "Szukaj",
-    "no_matching_values": "Brak pasujących wartości",
-    "properties": {
-      "state": "Stan",
-      "assignees": "Przypisani",
-      "priority": "Priorytet",
-      "start_date": "Data rozpoczęcia",
-      "due_date": "Termin",
-      "module": "Moduł",
-      "labels": "Etykiety"
-    },
     "clear_start_date": "Wyczyść datę rozpoczęcia",
     "clear_due_date": "Wyczyść termin",
     "toast": {

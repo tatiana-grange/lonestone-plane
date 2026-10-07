@@ -9,9 +9,9 @@ import { observer } from "mobx-react";
 import { useParams } from "react-router";
 import { useTranslation } from "@plane/i18n";
 import type { TBulkOperationsPayload, TIssue } from "@plane/types";
-import { Avatar } from "@plane/ui";
-import { getFileURL } from "@plane/utils";
-import { ModuleIcon } from "@plane/propel/icons";
+import { useMemberDropdownOptions } from "@/components/dropdowns/member/member-options";
+import { getModuleDropdownOptions } from "@/components/dropdowns/module/module-options";
+import { getLabelDropdownOptions } from "@/components/issues/issue-layouts/properties/label-dropdown";
 import { useIssues } from "@/hooks/store/use-issues";
 import { useLabel } from "@/hooks/store/use-label";
 import { useMember } from "@/hooks/store/use-member";
@@ -56,18 +56,11 @@ export const BulkAssigneesMenu = observer(function BulkAssigneesMenu(props: TBul
 
   // members only (no guests): the same list as the assignee dropdown
   const memberIds = getProjectMemberIds(projectId, false);
-  const options: TBulkTriStateOption[] = (memberIds ?? []).map((memberId) => {
-    const user = getUserDetails(memberId);
-    return {
-      id: memberId,
-      label: user?.display_name ?? "",
-      icon: <Avatar name={user?.display_name} src={getFileURL(user?.avatar_url ?? "")} size="sm" />,
-    };
-  });
+  const options: TBulkTriStateOption[] = useMemberDropdownOptions(memberIds ?? undefined, getUserDetails) ?? [];
 
   return (
     <BulkTriStateMenu
-      label={t("bulk_operations.properties.assignees")}
+      label={t("assignees")}
       options={options}
       getCount={getCount}
       selectedCount={selectedCount}
@@ -89,17 +82,11 @@ export const BulkLabelsMenu = observer(function BulkLabelsMenu(props: TBulkMenuP
   const { getCount, selectedCount } = useSelectionValueCount("label_ids");
 
   const labels = getProjectLabels(projectId);
-  const options: TBulkTriStateOption[] = (labels ?? []).map((label) => ({
-    id: label.id,
-    label: label.name,
-    icon: (
-      <span aria-hidden="true" className="size-2 flex-shrink-0 rounded-full" style={{ backgroundColor: label.color }} />
-    ),
-  }));
+  const options: TBulkTriStateOption[] = getLabelDropdownOptions(labels ?? []);
 
   return (
     <BulkTriStateMenu
-      label={t("bulk_operations.properties.labels")}
+      label={t("labels")}
       options={options}
       getCount={getCount}
       selectedCount={selectedCount}
@@ -121,16 +108,16 @@ export const BulkModulesMenu = observer(function BulkModulesMenu(props: TBulkMen
   const { getCount, selectedCount } = useSelectionValueCount("module_ids");
 
   const moduleIds = getProjectModuleIds(projectId);
-  const options: TBulkTriStateOption[] = (moduleIds ?? []).flatMap((moduleId) => {
+  // archived modules are not part of a work item's values
+  const activeModuleIds = moduleIds?.filter((moduleId) => {
     const projectModule = getModuleById(moduleId);
-    // archived modules are not part of a work item's values (same as the module dropdown)
-    if (!projectModule || projectModule.archived_at) return [];
-    return [{ id: moduleId, label: projectModule.name, icon: <ModuleIcon className="size-3 flex-shrink-0" /> }];
+    return !!projectModule && !projectModule.archived_at;
   });
+  const options: TBulkTriStateOption[] = getModuleDropdownOptions(activeModuleIds, getModuleById) ?? [];
 
   return (
     <BulkTriStateMenu
-      label={t("bulk_operations.properties.module")}
+      label={t("modules")}
       options={options}
       getCount={getCount}
       selectedCount={selectedCount}

@@ -12,7 +12,8 @@ import { Check, ChevronDown, Minus } from "lucide-react";
 import { useTranslation } from "@plane/i18n";
 import { cn } from "@plane/utils";
 
-export type TBulkTriStateOption = { id: string; label: string; icon?: ReactNode };
+// same shape as the options of the member, label and module dropdowns
+export type TBulkTriStateOption = { value: string; query: string; content: ReactNode; disabled?: boolean };
 
 type TTriState = "true" | "mixed" | "false";
 
@@ -62,7 +63,7 @@ export const BulkTriStateMenu = observer(function BulkTriStateMenu(props: Props)
 
   const normalizedQuery = query.trim().toLowerCase();
   const filteredOptions = normalizedQuery
-    ? options.filter((option) => option.label.toLowerCase().includes(normalizedQuery))
+    ? options.filter((option) => option.query.toLowerCase().includes(normalizedQuery))
     : options;
 
   return (
@@ -86,29 +87,28 @@ export const BulkTriStateMenu = observer(function BulkTriStateMenu(props: Props)
               type="text"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder={t("bulk_operations.search")}
-              aria-label={t("bulk_operations.search")}
+              placeholder={t("search")}
+              aria-label={t("search")}
               className="mb-1 w-full rounded-sm border-[0.5px] border-subtle bg-transparent px-2 py-1 text-11 text-secondary placeholder:text-placeholder focus:outline-none"
             />
             <div role="menu" aria-label={label} className="vertical-scrollbar max-h-48 overflow-y-auto">
               {filteredOptions.length === 0 && (
-                <p className="px-2 py-1 text-11 text-placeholder italic">{t("bulk_operations.no_matching_values")}</p>
+                <p className="px-2 py-1 text-11 text-placeholder italic">{t("no_matching_results")}</p>
               )}
               {filteredOptions.map((option) => {
-                const state = getTriState(getCount(option.id), selectedCount);
+                const state = getTriState(getCount(option.value), selectedCount);
                 return (
                   <button
-                    key={option.id}
+                    key={option.value}
                     type="button"
                     role="menuitemcheckbox"
                     aria-checked={state}
-                    disabled={disabled}
-                    onClick={() => (state === "true" ? onRemove(option.id) : onAdd(option.id))}
+                    disabled={disabled || option.disabled}
+                    onClick={() => (state === "true" ? onRemove(option.value) : onAdd(option.value))}
                     className="flex w-full items-center gap-2 rounded-sm px-2 py-1 text-left text-11 text-secondary hover:bg-layer-transparent-hover disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <TriStateIcon state={state} />
-                    {option.icon}
-                    <span className="flex-grow truncate">{option.label}</span>
+                    <span className="min-w-0 flex-grow">{option.content}</span>
                   </button>
                 );
               })}

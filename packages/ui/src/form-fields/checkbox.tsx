@@ -26,12 +26,21 @@ const Checkbox = React.forwardRef(function Checkbox(props: CheckboxProps, ref: R
     className,
     ...rest
   } = props;
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
+
+  // `indeterminate` only exists as a DOM property: set it so assistive technologies and `:indeterminate` see it.
+  // Re-applied on every render because a native click resets it.
+  React.useEffect(() => {
+    if (inputRef.current) inputRef.current.indeterminate = indeterminate;
+  });
 
   return (
     <div className={cn("relative flex flex-shrink-0 gap-2", containerClassName)}>
       <input
         id={id}
-        ref={ref}
+        ref={inputRef}
         type="checkbox"
         name={name}
         checked={checked}

@@ -6,8 +6,8 @@
 
 import { observer } from "mobx-react";
 import { useTranslation } from "@plane/i18n";
-import { Checkbox } from "@plane/ui";
 import { cn } from "@plane/utils";
+import { MultipleSelectEntityAction } from "@/components/core/multiple-select";
 import { useBoardSelection } from "./context";
 
 type Props = {
@@ -35,16 +35,12 @@ export const BoardCardSelectAction = observer(function BoardCardSelectAction(pro
         className
       )}
     >
-      <Checkbox
-        className="size-3.5 focus-visible:ring-2 focus-visible:ring-accent-strong"
-        iconClassName="size-3"
-        checked={isSelected}
+      <MultipleSelectEntityAction
+        className="focus-visible:ring-2 focus-visible:ring-accent-strong"
+        id={issueId}
+        groupId={groupId}
+        selectionHelpers={helpers}
         aria-label={t("bulk_operations.select_item", { identifier })}
-        readOnly
-        onClick={(event) => {
-          event.stopPropagation();
-          helpers.toggleEntity(issueId, groupId);
-        }}
       />
     </span>
   );

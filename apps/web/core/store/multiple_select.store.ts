@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { differenceWith, remove, isEqual } from "lodash-es";
+import { differenceWith, remove, isEqual, uniqBy } from "lodash-es";
 import { action, computed, makeObservable, observable, runInAction } from "mobx";
 import { computedFn } from "mobx-utils";
 // hooks
@@ -174,7 +174,8 @@ export class MultipleSelectStore implements IMultipleSelectStore {
         newEntities = differenceWith(this.selectedEntityDetails, entitiesList, (obj1, obj2) =>
           isEqual(obj1.entityID, obj2.entityID)
         );
-        newEntities = newEntities.concat(entitiesList);
+        // a work item shown in several groups (e.g. grouped by labels) is listed once per group: keep one
+        newEntities = newEntities.concat(uniqBy(entitiesList, (en) => en.entityID));
         this.selectedEntityDetails = newEntities;
         if (entitiesList.length > 0) this.updateLastSelectedEntityDetails(entitiesList[entitiesList.length - 1]);
       });

@@ -331,17 +331,6 @@
     "clear_selection": "清除選取",
     "select_item": "選取 {identifier}",
     "select_column": "全選 {column} 中的項目",
-    "search": "搜尋",
-    "no_matching_values": "沒有相符的值",
-    "properties": {
-      "state": "狀態",
-      "assignees": "指派對象",
-      "priority": "優先順序",
-      "start_date": "開始日期",
-      "due_date": "截止日期",
-      "module": "模組",
-      "labels": "標籤"
-    },
     "clear_start_date": "清除開始日期",
     "clear_due_date": "清除截止日期",
     "toast": {

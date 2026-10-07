@@ -331,17 +331,6 @@
     "clear_selection": "Скасувати вибір",
     "select_item": "Вибрати {identifier}",
     "select_column": "Вибрати все в {column}",
-    "search": "Пошук",
-    "no_matching_values": "Немає відповідних значень",
-    "properties": {
-      "state": "Стан",
-      "assignees": "Призначені",
-      "priority": "Пріоритет",
-      "start_date": "Дата початку",
-      "due_date": "Крайній термін",
-      "module": "Модуль",
-      "labels": "Мітки"
-    },
     "clear_start_date": "Очистити дату початку",
     "clear_due_date": "Очистити крайній термін",
     "toast": {

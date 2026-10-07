@@ -295,7 +295,7 @@ export const useMultipleSelect = (props: Props) => {
   );
 
   /**
-   * @description select every entity of several groups, or unselect them when they are all selected
+   * @description select every entity of several groups when none is selected, unselect them otherwise
    */
   const handleGroupsSelection = useCallback(
     (groupIDs: string[]) => {
@@ -303,7 +303,7 @@ export const useMultipleSelect = (props: Props) => {
       const groupIDSet = new Set(groupIDs);
       const groupEntities = entitiesList.filter((entity) => groupIDSet.has(entity.groupID));
       const status = getGroupsSelectionStatus(groupIDs);
-      handleEntitySelection(groupEntities, false, status === "complete" ? "force-remove" : "force-add");
+      handleEntitySelection(groupEntities, false, status === "empty" ? "force-add" : "force-remove");
     },
     [disabled, entitiesList, getGroupsSelectionStatus, handleEntitySelection]
   );
@@ -314,30 +314,15 @@ export const useMultipleSelect = (props: Props) => {
    * @returns {boolean}
    */
   const isGroupSelected = useCallback(
-    (groupID: string) => {
-      const groupEntities = entitiesList.filter((entity) => entity.groupID === groupID);
-      const totalSelected = groupEntities.filter((entity) => getIsEntitySelected(entity?.entityID ?? "")).length;
-      if (totalSelected === 0) return "empty";
-      if (totalSelected === groupEntities.length) return "complete";
-      return "partial";
-    },
-    [entitiesList, getIsEntitySelected]
+    (groupID: string) => getGroupsSelectionStatus([groupID]),
+    [getGroupsSelectionStatus]
   );
 
   /**
    * @description toggle group selection
    * @param {string} groupID
    */
-  const handleGroupClick = useCallback(
-    (groupID: string) => {
-      if (disabled) return;
-
-      const groupEntities = entitiesList.filter((entity) => entity.groupID === groupID);
-      const groupSelectionStatus = isGroupSelected(groupID);
-      handleEntitySelection(groupEntities, false, groupSelectionStatus === "empty" ? "force-add" : "force-remove");
-    },
-    [disabled, entitiesList, handleEntitySelection, isGroupSelected]
-  );
+  const handleGroupClick = useCallback((groupID: string) => handleGroupsSelection([groupID]), [handleGroupsSelection]);
 
   // select entities on shift + arrow up/down key press
   useEffect(() => {

@@ -331,17 +331,6 @@
     "clear_selection": "Bỏ chọn",
     "select_item": "Chọn {identifier}",
     "select_column": "Chọn tất cả trong {column}",
-    "search": "Tìm kiếm",
-    "no_matching_values": "Không có giá trị phù hợp",
-    "properties": {
-      "state": "Trạng thái",
-      "assignees": "Người phụ trách",
-      "priority": "Ưu tiên",
-      "start_date": "Ngày bắt đầu",
-      "due_date": "Ngày hết hạn",
-      "module": "Mô-đun",
-      "labels": "Nhãn"
-    },
     "clear_start_date": "Xóa ngày bắt đầu",
     "clear_due_date": "Xóa ngày hết hạn",
     "toast": {

@@ -331,17 +331,6 @@
     "clear_selection": "Zrušiť výber",
     "select_item": "Vybrať {identifier}",
     "select_column": "Vybrať všetko v {column}",
-    "search": "Hľadať",
-    "no_matching_values": "Žiadne zodpovedajúce hodnoty",
-    "properties": {
-      "state": "Stav",
-      "assignees": "Priradení",
-      "priority": "Priorita",
-      "start_date": "Dátum začiatku",
-      "due_date": "Termín",
-      "module": "Modul",
-      "labels": "Štítky"
-    },
     "clear_start_date": "Vymazať dátum začiatku",
     "clear_due_date": "Vymazať termín",
     "toast": {

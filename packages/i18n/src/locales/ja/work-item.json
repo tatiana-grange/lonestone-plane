@@ -331,17 +331,6 @@
     "clear_selection": "選択を解除",
     "select_item": "{identifier} を選択",
     "select_column": "{column} をすべて選択",
-    "search": "検索",
-    "no_matching_values": "一致する値がありません",
-    "properties": {
-      "state": "状態",
-      "assignees": "担当者",
-      "priority": "優先度",
-      "start_date": "開始日",
-      "due_date": "期限",
-      "module": "モジュール",
-      "labels": "ラベル"
-    },
     "clear_start_date": "開始日をクリア",
     "clear_due_date": "期限をクリア",
     "toast": {

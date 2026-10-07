@@ -331,17 +331,6 @@
     "clear_selection": "Снять выделение",
     "select_item": "Выбрать {identifier}",
     "select_column": "Выбрать всё в {column}",
-    "search": "Поиск",
-    "no_matching_values": "Нет подходящих значений",
-    "properties": {
-      "state": "Статус",
-      "assignees": "Назначенные",
-      "priority": "Приоритет",
-      "start_date": "Дата начала",
-      "due_date": "Срок выполнения",
-      "module": "Модуль",
-      "labels": "Метки"
-    },
     "clear_start_date": "Очистить дату начала",
     "clear_due_date": "Очистить срок выполнения",
     "toast": {

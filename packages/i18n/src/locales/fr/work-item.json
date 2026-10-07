@@ -331,17 +331,6 @@
     "clear_selection": "Effacer la sélection",
     "select_item": "Sélectionner {identifier}",
     "select_column": "Tout sélectionner dans {column}",
-    "search": "Rechercher",
-    "no_matching_values": "Aucune valeur correspondante",
-    "properties": {
-      "state": "État",
-      "assignees": "Assignés",
-      "priority": "Priorité",
-      "start_date": "Date de début",
-      "due_date": "Date d'échéance",
-      "module": "Module",
-      "labels": "Étiquettes"
-    },
     "clear_start_date": "Effacer la date de début",
     "clear_due_date": "Effacer la date d'échéance",
     "toast": {

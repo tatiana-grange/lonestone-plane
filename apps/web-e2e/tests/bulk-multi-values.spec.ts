@@ -92,12 +92,13 @@ test.describe("bulk assignees", () => {
     await bar(page).getByRole("button", { name: "Assignees" }).click();
 
     // owner on every work item, second member on one of them
-    await expect(menuItem(page, owner.displayName)).toHaveAttribute("aria-checked", "true");
+    // the current user is listed as "You", as in the assignee dropdown
+    await expect(menuItem(page, "You")).toHaveAttribute("aria-checked", "true");
     await expect(menuItem(page, second.displayName)).toHaveAttribute("aria-checked", "mixed");
 
     // reassign: remove the owner from all, then add the second member to all
-    await menuItem(page, owner.displayName).click();
-    await expect(menuItem(page, owner.displayName)).toHaveAttribute("aria-checked", "false");
+    await menuItem(page, "You").click();
+    await expect(menuItem(page, "You")).toHaveAttribute("aria-checked", "false");
     await expect(menu(page)).toBeVisible();
     await menuItem(page, second.displayName).click();
     await expect(menuItem(page, second.displayName)).toHaveAttribute("aria-checked", "true");
@@ -106,6 +107,33 @@ test.describe("bulk assignees", () => {
       // oxlint-disable-next-line no-await-in-loop
       expect(await assigneesOf(project, item)).toEqual([second.id]);
     }
+    await memberContext.close();
+  });
+
+  test("the search matches a member's first and last name, as in the assignee dropdown", async ({
+    page,
+    browser,
+    project,
+  }) => {
+    const memberContext = await browser.newContext();
+    const second = await addProjectMember(
+      project.session,
+      memberContext.request,
+      project.workspaceSlug,
+      project.projectId,
+      { first_name: "Zelda", last_name: "Quartz" }
+    );
+    const items = await createWorkItems(project, ["Foxtrot"]);
+
+    await openAndSelect(page, project, items);
+    await bar(page).getByRole("button", { name: "Assignees" }).click();
+    const search = menu(page).getByRole("textbox", { name: "Search" });
+
+    await search.fill("zelda");
+    await expect(menuItem(page, second.displayName)).toBeVisible();
+    await expect(menuItem(page, "You")).toBeHidden();
+    await search.fill("quartz");
+    await expect(menuItem(page, second.displayName)).toBeVisible();
     await memberContext.close();
   });
 
@@ -161,7 +189,7 @@ test.describe("bulk labels and modules", () => {
     await addModuleWorkItems(project.session, project.workspaceSlug, project.projectId, payment.id, [items[0].id]);
 
     await openAndSelect(page, project, items);
-    await bar(page).getByRole("button", { name: "Module" }).click();
+    await bar(page).getByRole("button", { name: "Modules" }).click();
     await expect(menuItem(page, "Paiement")).toHaveAttribute("aria-checked", "mixed");
 
     await menuItem(page, "Paiement").click();

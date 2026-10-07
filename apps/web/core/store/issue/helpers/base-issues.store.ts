@@ -774,7 +774,19 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
         const issueDetails = this.rootIssueStore.issues.getIssueById(issueId);
         this.updateIssueList(issueDetails, issueBeforeUpdate);
       });
+      // in a module's view, work items taken out of that module leave the list
+      if (this.moduleId && data.properties.remove_module_ids?.includes(this.moduleId)) {
+        response.updated_issue_ids.forEach((issueId) => this.removeIssueFromList(issueId));
+      }
     });
+    // module changes affect the current module's stats
+    if (
+      this.moduleId &&
+      (data.properties.module_ids?.includes(this.moduleId) ||
+        data.properties.remove_module_ids?.includes(this.moduleId))
+    ) {
+      this.fetchParentStats(workspaceSlug, projectId);
+    }
     return response;
   };
 
