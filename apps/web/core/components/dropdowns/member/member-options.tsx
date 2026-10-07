@@ -35,53 +35,6 @@ interface Props {
   value?: string[] | string | null;
 }
 
-export type TMemberDropdownOption = {
-  value: string;
-  query: string;
-  content: React.ReactNode;
-  disabled: boolean;
-};
-
-/** Options of the member dropdown (also used by the bulk assignees menu): suspended members are disabled. */
-export const useMemberDropdownOptions = (
-  memberIds: string[] | undefined,
-  getUserDetails: (userId: string) => IUserLite | undefined
-): TMemberDropdownOption[] | undefined => {
-  // router
-  const { workspaceSlug } = useParams();
-  // plane hooks
-  const { t } = useTranslation();
-  // store hooks
-  const { data: currentUser } = useUser();
-  const {
-    workspace: { isUserSuspended },
-  } = useMember();
-
-  return memberIds?.map((userId) => {
-    const userDetails = getUserDetails(userId);
-    const isSuspended = isUserSuspended(userId, workspaceSlug?.toString());
-    return {
-      value: userId,
-      query: `${userDetails?.display_name} ${userDetails?.first_name} ${userDetails?.last_name}`,
-      disabled: isSuspended,
-      content: (
-        <div className="flex items-center gap-2">
-          <div className="w-4">
-            {isSuspended ? (
-              <SuspendedUserIcon className="h-3.5 w-3.5 text-placeholder" />
-            ) : (
-              <Avatar name={userDetails?.display_name} src={getFileURL(userDetails?.avatar_url ?? "")} />
-            )}
-          </div>
-          <span className={cn("flex-grow truncate", isSuspended ? "text-placeholder" : "")}>
-            {currentUser?.id === userId ? t("you") : userDetails?.display_name}
-          </span>
-        </div>
-      ),
-    };
-  });
-};
-
 export const MemberOptions = observer(function MemberOptions(props: Props) {
   const {
     getUserDetails,
@@ -125,10 +78,11 @@ export const MemberOptions = observer(function MemberOptions(props: Props) {
     if (isOpen) {
       onDropdownOpen?.();
       if (!isMobile) {
-        inputRef.current?.focus();
+        // oxlint-disable-next-line no-unused-expressions -- upstream code, left as is to keep upstream merges clean
+        inputRef.current && inputRef.current.focus();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- upstream code, left as is to keep upstream merges clean
   }, [isOpen, isMobile]);
 
   const searchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -138,7 +92,34 @@ export const MemberOptions = observer(function MemberOptions(props: Props) {
     }
   };
 
-  const options = useMemberDropdownOptions(memberIds, getUserDetails);
+  const options = memberIds
+    ?.map((userId) => {
+      const userDetails = getUserDetails(userId);
+      return {
+        value: userId,
+        query: `${userDetails?.display_name} ${userDetails?.first_name} ${userDetails?.last_name}`,
+        content: (
+          <div className="flex items-center gap-2">
+            <div className="w-4">
+              {isUserSuspended(userId, workspaceSlug?.toString()) ? (
+                <SuspendedUserIcon className="h-3.5 w-3.5 text-placeholder" />
+              ) : (
+                <Avatar name={userDetails?.display_name} src={getFileURL(userDetails?.avatar_url ?? "")} />
+              )}
+            </div>
+            <span
+              className={cn(
+                "flex-grow truncate",
+                isUserSuspended(userId, workspaceSlug?.toString()) ? "text-placeholder" : ""
+              )}
+            >
+              {currentUser?.id === userId ? t("you") : userDetails?.display_name}
+            </span>
+          </div>
+        ),
+      };
+    })
+    .filter((o) => !!o);
 
   const filteredOptions = sortByCurrentUserThenSelected(
     query === "" ? options : options?.filter((o) => o?.query.toLowerCase().includes(query.toLowerCase())),

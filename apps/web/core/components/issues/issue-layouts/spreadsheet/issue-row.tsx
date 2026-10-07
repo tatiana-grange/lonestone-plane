@@ -215,17 +215,13 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
   useOutsideClickDetector(menuActionRef, () => setIsMenuActive(false));
 
   const customActionButton = (
+    // oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, left as is to keep upstream merges clean
     <div
       ref={menuActionRef}
       className={`flex h-full w-full cursor-pointer items-center rounded-sm p-1 text-placeholder hover:bg-layer-1 ${
         isMenuActive ? "bg-layer-1 text-primary" : "text-secondary"
       }`}
-      // CustomMenu wraps this in its own <button>: this element only tracks the open state for styling
-      role="presentation"
       onClick={() => setIsMenuActive(!isMenuActive)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") setIsMenuActive(!isMenuActive);
-      }}
     >
       <MoreHorizontal className="h-3.5 w-3.5" />
     </div>
@@ -383,11 +379,10 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
                     </Tooltip>
                   </div>
                 </div>
+                {/* oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, left as is to keep upstream merges clean */}
                 <div
-                  role="presentation"
                   className={`opacity-0 transition-opacity group-hover:opacity-100 ${isMenuActive ? "!opacity-100" : ""}`}
                   onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
                 >
                   {quickActions({
                     issue: issueDetail,

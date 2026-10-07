@@ -6,6 +6,7 @@
 
 import { useEffect } from "react";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
+import { selectAllEntities, toggleEntity } from "@/plane-web/components/issues/selection/actions";
 
 const NON_TEXT_INPUT_TYPES = new Set(["checkbox", "radio", "button", "submit", "reset"]);
 
@@ -49,7 +50,7 @@ export const useSelectionShortcuts = (params: { helpers: TSelectionHelper; disab
 
       if (key === "a" && hasCommandModifier && !event.altKey && !event.shiftKey) {
         event.preventDefault();
-        helpers.handleSelectAll();
+        selectAllEntities(helpers);
         return;
       }
 
@@ -59,7 +60,7 @@ export const useSelectionShortcuts = (params: { helpers: TSelectionHelper; disab
         const groupID = hovered?.dataset.selectionGroupId;
         if (!entityID || !groupID) return;
         event.preventDefault();
-        helpers.toggleEntity(entityID, groupID);
+        toggleEntity(helpers, entityID, groupID);
       }
     };
 

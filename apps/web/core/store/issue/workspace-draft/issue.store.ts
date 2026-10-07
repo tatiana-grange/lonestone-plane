@@ -242,7 +242,8 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
           const newIssueIds = issueIds.filter((issueId) => !existingIssueIds.includes(issueId));
           this.addIssue(results);
           // issue map update
-          update(this.issueMapIds, [workspaceSlug], (currentIssueIds = []) => [...newIssueIds, ...currentIssueIds]);
+          // oxlint-disable-next-line no-shadow -- upstream code, left as is to keep upstream merges clean
+          update(this.issueMapIds, [workspaceSlug], (existingIssueIds = []) => [...newIssueIds, ...existingIssueIds]);
           this.loader = undefined;
         } else {
           this.loader = "empty-state";
@@ -297,7 +298,8 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
         set(this.issuesMap, [issueId], {
           ...issueBeforeUpdate,
           ...payload,
-          updated_at: getCurrentDateTimeInISO(),
+          // oxlint-disable-next-line eslint-plugin-unicorn/no-useless-spread -- upstream code, left as is to keep upstream merges clean
+          ...{ updated_at: getCurrentDateTimeInISO() },
         });
       });
       const response = await workspaceDraftService.updateIssue(workspaceSlug, issueId, payload);

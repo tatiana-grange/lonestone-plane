@@ -5,3 +5,4 @@
  */
 
 export * from "./click-capture";
+export * from "./actions";

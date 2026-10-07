@@ -88,7 +88,8 @@ export class ArchivedIssues extends BaseIssuesStore implements IArchivedIssues {
    * @param projectId
    */
   fetchParentStats = async (workspaceSlug: string, projectId?: string) => {
-    if (projectId) void this.rootIssueStore.rootStore.projectRoot.project.fetchProjectDetails(workspaceSlug, projectId);
+    // oxlint-disable-next-line no-unused-expressions -- upstream code, left as is to keep upstream merges clean
+    projectId && this.rootIssueStore.rootStore.projectRoot.project.fetchProjectDetails(workspaceSlug, projectId);
   };
 
   /** */

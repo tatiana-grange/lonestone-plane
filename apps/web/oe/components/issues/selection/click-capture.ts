@@ -6,6 +6,7 @@
 
 import type { MouseEvent } from "react";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
+import { toggleEntity } from "./actions";
 
 /**
  * `onClickCapture` handler that turns Cmd/Ctrl + click on a work item into a selection toggle, and
@@ -28,7 +29,7 @@ export const getSelectionClickCaptureHandler = (
     if (event.metaKey || event.ctrlKey) {
       event.preventDefault();
       event.stopPropagation();
-      helpers.toggleEntity(entityID, groupID);
+      toggleEntity(helpers, entityID, groupID);
       return;
     }
     if (event.shiftKey) {

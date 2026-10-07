@@ -10,6 +10,7 @@ import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 import { useMultipleSelect } from "@/hooks/use-multiple-select";
 // plane web hooks
 import { useClearSelectionOnBackgroundClick } from "@/plane-web/hooks/use-clear-selection-on-background-click";
+import { useFollowSelectedEntityGroup } from "@/plane-web/hooks/use-follow-selected-entity-group";
 import { useSelectionShortcuts } from "@/plane-web/hooks/use-selection-shortcuts";
 
 type Props = {
@@ -31,6 +32,7 @@ export const MultipleSelectGroup = observer(function MultipleSelectGroup(props: 
   });
   useSelectionShortcuts({ helpers, disabled });
   useClearSelectionOnBackgroundClick({ containerRef, helpers, disabled });
+  useFollowSelectedEntityGroup({ helpers, disabled });
 
   return <>{children(helpers)}</>;
 });

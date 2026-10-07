@@ -83,7 +83,8 @@ function main(): void {
   const jsonFiles = fs
     .readdirSync(localesDir)
     .filter((file) => file.endsWith(".json"))
-    .toSorted();
+    // oxlint-disable-next-line eslint-plugin-unicorn/no-array-sort -- upstream code
+    .sort();
 
   if (jsonFiles.length === 0) {
     console.error(`Error: No JSON files found in ${localesDir}`);
@@ -133,7 +134,8 @@ function main(): void {
   }
 
   // Detect path conflicts
-  const sortedKeys = [...allKeys].toSorted();
+  // oxlint-disable-next-line eslint-plugin-unicorn/no-array-sort -- upstream code
+  const sortedKeys = [...allKeys].sort();
   const pathConflicts = detectPathConflicts(sortedKeys);
 
   if (pathConflicts.length > 0) {

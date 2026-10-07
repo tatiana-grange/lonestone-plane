@@ -142,8 +142,9 @@ export class MultipleSelectStore implements IMultipleSelectStore {
    * @param {TEntityDetails} entityDetails
    * @param {"add" | "remove"} action
    */
-  updateSelectedEntityDetails = (entityDetails: TEntityDetails, selectionAction: "add" | "remove") => {
-    if (selectionAction === "add") {
+  // oxlint-disable-next-line no-shadow -- upstream code, param shadows the mobx `action` import
+  updateSelectedEntityDetails = (entityDetails: TEntityDetails, action: "add" | "remove") => {
+    if (action === "add") {
       runInAction(() => {
         if (this.getIsEntitySelected(entityDetails.entityID)) {
           remove(this.selectedEntityDetails, (en) => en.entityID === entityDetails.entityID);
@@ -166,8 +167,9 @@ export class MultipleSelectStore implements IMultipleSelectStore {
    * @param {TEntityDetails[]} entitiesList
    * @param {"add" | "remove"} action
    */
-  bulkUpdateSelectedEntityDetails = (entitiesList: TEntityDetails[], selectionAction: "add" | "remove") => {
-    if (selectionAction === "add") {
+  // oxlint-disable-next-line no-shadow -- upstream code, param shadows the mobx `action` import
+  bulkUpdateSelectedEntityDetails = (entitiesList: TEntityDetails[], action: "add" | "remove") => {
+    if (action === "add") {
       runInAction(() => {
         let newEntities: TEntityDetails[] = [];
         // compare by entity only: an entity already selected under another group must not be duplicated

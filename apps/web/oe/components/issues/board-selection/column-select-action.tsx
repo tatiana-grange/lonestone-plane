@@ -8,6 +8,7 @@ import { observer } from "mobx-react";
 import { useTranslation } from "@plane/i18n";
 import { Checkbox } from "@plane/ui";
 import { cn } from "@plane/utils";
+import { getGroupsSelectionStatus, toggleGroupsSelection } from "@/plane-web/components/issues/selection/actions";
 import { useBoardColumnGroupIds, useBoardSelection } from "./context";
 
 type Props = {
@@ -25,7 +26,7 @@ export const BoardColumnSelectAction = observer(function BoardColumnSelectAction
 
   if (!helpers || helpers.isSelectionDisabled || groupIds.length === 0) return null;
 
-  const status = helpers.getGroupsSelectionStatus(groupIds);
+  const status = getGroupsSelectionStatus(helpers, groupIds);
 
   return (
     <span className={cn("grid size-6 flex-shrink-0 place-items-center", className)}>
@@ -38,7 +39,7 @@ export const BoardColumnSelectAction = observer(function BoardColumnSelectAction
         readOnly
         onClick={(event) => {
           event.stopPropagation();
-          helpers.handleGroupsSelection(groupIds);
+          toggleGroupsSelection(helpers, groupIds);
         }}
       />
     </span>

@@ -9,16 +9,13 @@ import { observer } from "mobx-react";
 import { useParams } from "react-router";
 import { useTranslation } from "@plane/i18n";
 import type { TBulkOperationsPayload, TIssue } from "@plane/types";
-import { useMemberDropdownOptions } from "@/components/dropdowns/member/member-options";
-import { getModuleDropdownOptions } from "@/components/dropdowns/module/module-options";
-import { getLabelDropdownOptions } from "@/components/issues/issue-layouts/properties/label-dropdown";
 import { useIssues } from "@/hooks/store/use-issues";
 import { useLabel } from "@/hooks/store/use-label";
 import { useMember } from "@/hooks/store/use-member";
 import { useModule } from "@/hooks/store/use-module";
 import { useMultipleSelectStore } from "@/hooks/store/use-multiple-select-store";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
-import type { TBulkTriStateOption } from "./tri-state-menu";
+import { getLabelOptions, getModuleOptions, useMemberOptions } from "./dropdown-options";
 import { BulkTriStateMenu } from "./tri-state-menu";
 
 export type TBulkMenuProps = {
@@ -56,7 +53,7 @@ export const BulkAssigneesMenu = observer(function BulkAssigneesMenu(props: TBul
 
   // members only (no guests): the same list as the assignee dropdown
   const memberIds = getProjectMemberIds(projectId, false);
-  const options: TBulkTriStateOption[] = useMemberDropdownOptions(memberIds ?? undefined, getUserDetails) ?? [];
+  const options = useMemberOptions(memberIds ?? undefined, getUserDetails);
 
   return (
     <BulkTriStateMenu
@@ -82,7 +79,7 @@ export const BulkLabelsMenu = observer(function BulkLabelsMenu(props: TBulkMenuP
   const { getCount, selectedCount } = useSelectionValueCount("label_ids");
 
   const labels = getProjectLabels(projectId);
-  const options: TBulkTriStateOption[] = getLabelDropdownOptions(labels ?? []);
+  const options = getLabelOptions(labels ?? []);
 
   return (
     <BulkTriStateMenu
@@ -113,7 +110,7 @@ export const BulkModulesMenu = observer(function BulkModulesMenu(props: TBulkMen
     const projectModule = getModuleById(moduleId);
     return !!projectModule && !projectModule.archived_at;
   });
-  const options: TBulkTriStateOption[] = getModuleDropdownOptions(activeModuleIds, getModuleById) ?? [];
+  const options = getModuleOptions(activeModuleIds, getModuleById);
 
   return (
     <BulkTriStateMenu

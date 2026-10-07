@@ -36,25 +36,6 @@ interface Props {
   value?: string[] | string | null;
 }
 
-/** Options of the module dropdown (also used by the bulk modules menu). */
-export const getModuleDropdownOptions = (
-  moduleIds: string[] | undefined,
-  getModuleById: (moduleId: string) => IModule | null
-) =>
-  moduleIds?.map((moduleId) => {
-    const moduleDetails = getModuleById(moduleId);
-    return {
-      value: moduleId,
-      query: `${moduleDetails?.name}`,
-      content: (
-        <div className="flex items-center gap-2">
-          <ModuleIcon className="h-3 w-3 flex-shrink-0" />
-          <span className="flex-grow truncate">{moduleDetails?.name}</span>
-        </div>
-      ),
-    };
-  });
-
 export const ModuleOptions = observer(function ModuleOptions(props: Props) {
   const { getModuleById, isOpen, moduleIds, multiple, onDropdownOpen, placement, referenceElement, value } = props;
   // refs
@@ -71,7 +52,8 @@ export const ModuleOptions = observer(function ModuleOptions(props: Props) {
     if (isOpen) {
       onOpen();
       if (!isMobile) {
-        inputRef.current?.focus();
+        // oxlint-disable-next-line no-unused-expressions -- upstream code, left as is to keep upstream merges clean
+        inputRef.current && inputRef.current.focus();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,7 +83,19 @@ export const ModuleOptions = observer(function ModuleOptions(props: Props) {
     }
   };
 
-  const options: DropdownOptions = getModuleDropdownOptions(moduleIds, getModuleById);
+  const options: DropdownOptions = moduleIds?.map((moduleId) => {
+    const moduleDetails = getModuleById(moduleId);
+    return {
+      value: moduleId,
+      query: `${moduleDetails?.name}`,
+      content: (
+        <div className="flex items-center gap-2">
+          <ModuleIcon className="h-3 w-3 flex-shrink-0" />
+          <span className="flex-grow truncate">{moduleDetails?.name}</span>
+        </div>
+      ),
+    };
+  });
   if (!multiple)
     options?.unshift({
       value: null,

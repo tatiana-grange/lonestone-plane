@@ -36,10 +36,13 @@ export type TSelectionHelper = {
   handleGroupClick: (groupID: string) => void;
   isGroupSelected: (groupID: string) => "empty" | "partial" | "complete";
   isSelectionDisabled: boolean;
-  toggleEntity: (entityID: string, groupID: string) => void;
-  handleSelectAll: () => void;
-  handleGroupsSelection: (groupIDs: string[]) => void;
-  getGroupsSelectionStatus: (groupIDs: string[]) => "empty" | "partial" | "complete";
+  // fork: primitives for the selection actions in @/plane-web/components/issues/selection
+  entitiesList: TEntityDetails[];
+  handleEntitySelection: (
+    entityDetails: TEntityDetails | TEntityDetails[],
+    shouldScroll?: boolean,
+    forceAction?: "force-add" | "force-remove" | null
+  ) => void;
 };
 
 export const useMultipleSelect = (props: Props) => {
@@ -58,7 +61,6 @@ export const useMultipleSelect = (props: Props) => {
     getNextActiveEntity,
     updateNextActiveEntity,
     getLastSelectedEntityDetails,
-    updateSelectedEntityGroup,
     clearSelection,
     getIsEntitySelected,
     getIsEntityActive,
@@ -78,13 +80,15 @@ export const useMultipleSelect = (props: Props) => {
 
   const entitiesList: TEntityDetails[] = useMemo(
     () =>
-      groups?.flatMap(
-        (groupID) =>
+      groups
+        // oxlint-disable-next-line eslint-plugin-unicorn/prefer-array-flat-map -- upstream code
+        ?.map((groupID) =>
           entities?.[groupID]?.map((entityID) => ({
             entityID,
             groupID,
-          })) ?? []
-      ),
+          }))
+        )
+        .flat(1),
     [entities, groups]
   );
 
@@ -186,6 +190,7 @@ export const useMultipleSelect = (props: Props) => {
 
       if (forceAction) {
         if (forceAction === "force-add") {
+          console.log("force adding");
           updateSelectedEntityDetails(entityDetails, "add");
           handleActiveEntityChange(entityDetails, shouldScroll);
         }
@@ -223,8 +228,7 @@ export const useMultipleSelect = (props: Props) => {
     (e: React.MouseEvent, entityID: string, groupID: string) => {
       if (disabled) return;
       const lastSelectedEntityDetails = getLastSelectedEntityDetails();
-      const isRangeAllowed =
-        !!lastSelectedEntityDetails && (rangeScope === "all" || lastSelectedEntityDetails.groupID === groupID);
+      const isRangeAllowed = rangeScope === "all" || lastSelectedEntityDetails?.groupID === groupID;
       if (e.shiftKey && lastSelectedEntityDetails && isRangeAllowed) {
         // match the group too: an entity can show in several groups
         const currentEntityIndex = entitiesList.findIndex(
@@ -273,29 +277,14 @@ export const useMultipleSelect = (props: Props) => {
   );
 
   /**
-   * @description toggle a single entity, without range or scroll (cmd/ctrl + click, "x", long press)
+   * @description check if any entity of the group is selected
+   * @param {string} groupID
+   * @returns {boolean}
    */
-  const toggleEntity = useCallback(
-    (entityID: string, groupID: string) => handleEntitySelection({ entityID, groupID }, false),
-    [handleEntitySelection]
-  );
-
-  /**
-   * @description select every displayed entity (cmd/ctrl + a)
-   */
-  const handleSelectAll = useCallback(() => {
-    if (disabled) return;
-    handleEntitySelection(entitiesList, false, "force-add");
-  }, [disabled, entitiesList, handleEntitySelection]);
-
-  /**
-   * @description selection status of the union of several groups (e.g. a board column split in swimlanes)
-   */
-  const getGroupsSelectionStatus = useCallback(
-    (groupIDs: string[]) => {
-      const groupIDSet = new Set(groupIDs);
-      const groupEntities = entitiesList.filter((entity) => groupIDSet.has(entity.groupID));
-      const totalSelected = groupEntities.filter((entity) => getIsEntitySelected(entity.entityID)).length;
+  const isGroupSelected = useCallback(
+    (groupID: string) => {
+      const groupEntities = entitiesList.filter((entity) => entity.groupID === groupID);
+      const totalSelected = groupEntities.filter((entity) => getIsEntitySelected(entity?.entityID ?? "")).length;
       if (totalSelected === 0) return "empty";
       if (totalSelected === groupEntities.length) return "complete";
       return "partial";
@@ -304,34 +293,19 @@ export const useMultipleSelect = (props: Props) => {
   );
 
   /**
-   * @description select every entity of several groups when none is selected, unselect them otherwise
-   */
-  const handleGroupsSelection = useCallback(
-    (groupIDs: string[]) => {
-      if (disabled) return;
-      const groupIDSet = new Set(groupIDs);
-      const groupEntities = entitiesList.filter((entity) => groupIDSet.has(entity.groupID));
-      const status = getGroupsSelectionStatus(groupIDs);
-      handleEntitySelection(groupEntities, false, status === "empty" ? "force-add" : "force-remove");
-    },
-    [disabled, entitiesList, getGroupsSelectionStatus, handleEntitySelection]
-  );
-
-  /**
-   * @description check if any entity of the group is selected
-   * @param {string} groupID
-   * @returns {boolean}
-   */
-  const isGroupSelected = useCallback(
-    (groupID: string) => getGroupsSelectionStatus([groupID]),
-    [getGroupsSelectionStatus]
-  );
-
-  /**
    * @description toggle group selection
    * @param {string} groupID
    */
-  const handleGroupClick = useCallback((groupID: string) => handleGroupsSelection([groupID]), [handleGroupsSelection]);
+  const handleGroupClick = useCallback(
+    (groupID: string) => {
+      if (disabled) return;
+
+      const groupEntities = entitiesList.filter((entity) => entity.groupID === groupID);
+      const groupSelectionStatus = isGroupSelected(groupID);
+      handleEntitySelection(groupEntities, false, groupSelectionStatus === "empty" ? "force-add" : "force-remove");
+    },
+    [disabled, entitiesList, handleEntitySelection, isGroupSelected]
+  );
 
   // select entities on shift + arrow up/down key press
   useEffect(() => {
@@ -418,27 +392,16 @@ export const useMultipleSelect = (props: Props) => {
   // when entities list change, remove entityIds from the selected entities array, which are not present in the new list
   useEffect(() => {
     if (disabled) return;
-    selectedEntityIds.forEach((entityID) => {
-      // an entity can show in several groups (e.g. a board grouped by labels)
-      const presentEntities = entitiesList.filter((en) => en?.entityID === entityID);
-      const entityDetails = getEntityDetailsFromEntityID(entityID);
-      if (presentEntities.length === 0) {
+    selectedEntityIds.map((entityID) => {
+      const isEntityPresent = entitiesList.find((en) => en?.entityID === entityID);
+      if (!isEntityPresent) {
+        const entityDetails = getEntityDetailsFromEntityID(entityID);
         if (entityDetails) {
           handleEntitySelection(entityDetails);
         }
-      } else if (entityDetails && !presentEntities.some((en) => en.groupID === entityDetails.groupID)) {
-        // the entity left its group (e.g. state change on a board): keep it selected where it is now
-        updateSelectedEntityGroup(entityID, presentEntities[0].groupID);
       }
     });
-  }, [
-    disabled,
-    entitiesList,
-    getEntityDetailsFromEntityID,
-    handleEntitySelection,
-    selectedEntityIds,
-    updateSelectedEntityGroup,
-  ]);
+  }, [disabled, entitiesList, getEntityDetailsFromEntityID, handleEntitySelection, selectedEntityIds]);
 
   /**
    * @description helper functions for selection
@@ -452,10 +415,8 @@ export const useMultipleSelect = (props: Props) => {
       handleGroupClick,
       isGroupSelected,
       isSelectionDisabled: disabled,
-      toggleEntity,
-      handleSelectAll,
-      handleGroupsSelection,
-      getGroupsSelectionStatus,
+      entitiesList,
+      handleEntitySelection,
     }),
     [
       clearSelection,
@@ -465,10 +426,8 @@ export const useMultipleSelect = (props: Props) => {
       handleEntityClick,
       handleGroupClick,
       isGroupSelected,
-      toggleEntity,
-      handleSelectAll,
-      handleGroupsSelection,
-      getGroupsSelectionStatus,
+      entitiesList,
+      handleEntitySelection,
     ]
   );
 

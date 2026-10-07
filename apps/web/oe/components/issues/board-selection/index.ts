@@ -8,3 +8,4 @@ export * from "./card-select-action";
 export * from "./column-select-action";
 export * from "./context";
 export * from "./use-touch-selection";
+export * from "./root";

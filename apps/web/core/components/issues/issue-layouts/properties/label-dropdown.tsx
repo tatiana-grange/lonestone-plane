@@ -46,29 +46,6 @@ export interface ILabelDropdownProps {
   label: React.ReactNode;
 }
 
-const preventPropagation = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-  e.stopPropagation();
-  e.preventDefault();
-};
-
-/** Options of the label dropdown (also used by the bulk labels menu). */
-export const getLabelDropdownOptions = (labels: IIssueLabel[]) =>
-  labels.map((label) => ({
-    value: label?.id,
-    query: label?.name,
-    content: (
-      <div className="flex items-center justify-start gap-2 overflow-hidden">
-        <span
-          className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-          style={{
-            backgroundColor: label?.color,
-          }}
-        />
-        <div className="line-clamp-1 inline-block truncate">{label?.name}</div>
-      </div>
-    ),
-  }));
-
 export function LabelDropdown(props: ILabelDropdownProps) {
   const {
     projectId,
@@ -120,7 +97,26 @@ export function LabelDropdown(props: ILabelDropdownProps) {
   let projectLabels: IIssueLabel[] = defaultOptions;
   if (storeLabels && storeLabels.length > 0) projectLabels = storeLabels;
 
-  const options = useMemo(() => getLabelDropdownOptions(projectLabels), [projectLabels]);
+  const options = useMemo(
+    () =>
+      // oxlint-disable-next-line no-shadow -- upstream code, left as is to keep upstream merges clean
+      projectLabels.map((label) => ({
+        value: label?.id,
+        query: label?.name,
+        content: (
+          <div className="flex items-center justify-start gap-2 overflow-hidden">
+            <span
+              className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+              style={{
+                backgroundColor: label?.color,
+              }}
+            />
+            <div className="line-clamp-1 inline-block truncate">{label?.name}</div>
+          </div>
+        ),
+      })),
+    [projectLabels]
+  );
 
   const filteredOptions = useMemo(
     () =>
@@ -168,8 +164,9 @@ export function LabelDropdown(props: ILabelDropdownProps) {
   const handleAddLabel = async (labelName: string) => {
     if (!projectId) return;
     setSubmitting(true);
-    const createdLabel = await createLabel(workspaceSlug, projectId, { name: labelName, color: getRandomLabelColor() });
-    onChange([...value, createdLabel.id]);
+    // oxlint-disable-next-line no-shadow -- upstream code, left as is to keep upstream merges clean
+    const label = await createLabel(workspaceSlug, projectId, { name: labelName, color: getRandomLabelColor() });
+    onChange([...value, label.id]);
     setQuery("");
     setSubmitting(false);
   };
@@ -237,9 +234,16 @@ export function LabelDropdown(props: ILabelDropdownProps) {
     ]
   );
 
+  // oxlint-disable-next-line eslint-plugin-unicorn/consistent-function-scoping -- upstream code, left as is to keep upstream merges clean
+  const preventPropagation = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
   return (
-    <div role="presentation" className={`${fullHeight ? "h-full" : "h-5"}`} onClick={preventPropagation}>
-      {/* oxlint-disable-next-line eslint-plugin-jsx-a11y/no-static-element-interactions -- headless UI combobox wrapper, keyboard handled by the combobox */}
+    // oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, left as is to keep upstream merges clean
+    <div className={`${fullHeight ? "h-full" : "h-5"}`} onClick={preventPropagation}>
+      {/* oxlint-disable-next-line eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, left as is to keep upstream merges clean */}
       <ComboDropDown
         as="div"
         ref={dropdownRef}
@@ -307,7 +311,7 @@ export function LabelDropdown(props: ILabelDropdownProps) {
                 ) : submitting ? (
                   <Loader className="h-3.5 w-3.5 animate-spin" />
                 ) : canCreateLabel ? (
-                  // oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events -- Enter in the search input creates the label
+                  // oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events -- upstream code, left as is to keep upstream merges clean
                   <p
                     onClick={() => {
                       if (!query.length) return;
