@@ -225,3 +225,25 @@ test.describe("Escape with the peek overview open", () => {
     await expect(bar(page)).toBeHidden();
   });
 });
+
+test.describe("timelines without work items", () => {
+  test("Cmd/Ctrl + A on the modules timeline does not open the work item bulk bar", async ({ page, project }) => {
+    const modules = [
+      await createModule(project.session, project.workspaceSlug, project.projectId, "Module one"),
+      await createModule(project.session, project.workspaceSlug, project.projectId, "Module two"),
+    ];
+    // the modules page keeps its layout in local storage, per project
+    await page.addInitScript((projectId) => {
+      window.localStorage.setItem("module_display_filters", JSON.stringify({ [projectId]: { layout: "gantt" } }));
+    }, project.projectId);
+
+    await page.goto(`/${project.workspaceSlug}/projects/${project.projectId}/modules`);
+    await expect(page.locator("#gantt-container")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(modules[0].name, { exact: true }).first()).toBeVisible();
+    await page.getByText(modules[0].name, { exact: true }).first().hover();
+
+    await page.keyboard.press("ControlOrMeta+a");
+
+    await expect(bar(page)).toBeHidden();
+  });
+});

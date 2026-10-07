@@ -31,6 +31,9 @@ function isOverlayOpen(): boolean {
  * - Escape clears the selection;
  * - Cmd/Ctrl + A selects every displayed work item;
  * - X toggles the work item under the pointer (elements tagged with `data-selection-entity-id`).
+ *
+ * It also keeps arrow keys typed in a field away from `useMultipleSelect`'s arrow navigation,
+ * which listens on `window` without checking the target.
  */
 export const useSelectionShortcuts = (params: { helpers: TSelectionHelper; disabled: boolean }) => {
   const { helpers, disabled } = params;
@@ -67,4 +70,18 @@ export const useSelectionShortcuts = (params: { helpers: TSelectionHelper; disab
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [disabled, helpers]);
+
+  useEffect(() => {
+    if (disabled) return;
+
+    // on document, bubbling: the field and its editor menus get the key first, window listeners never do
+    const stopArrowKeysFromFields = (event: KeyboardEvent) => {
+      if ((event.key === "ArrowUp" || event.key === "ArrowDown") && isEditableTarget(event.target)) {
+        event.stopPropagation();
+      }
+    };
+
+    document.addEventListener("keydown", stopArrowKeysFromFields);
+    return () => document.removeEventListener("keydown", stopArrowKeysFromFields);
+  }, [disabled]);
 };

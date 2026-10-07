@@ -138,3 +138,39 @@ test("list: a click on the empty area below the rows clears the selection", asyn
 
   await expect(bar(page)).toBeHidden();
 });
+
+test.describe("arrow keys while typing (list)", () => {
+  test("arrow keys in the quick-add field leave the work items alone", async ({ page, project }) => {
+    await openLayout(page, project, "list");
+
+    await page.getByText("New work item", { exact: true }).last().click();
+    const field = page.locator("input:focus");
+    await expect(field).toBeVisible();
+    await page.keyboard.type("Draft");
+
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Shift+ArrowDown");
+    await page.keyboard.press("Shift+ArrowDown");
+
+    await expect(bar(page)).toBeHidden();
+  });
+
+  test("Shift + arrow keys in the peek description extend the text selection only", async ({ page, project }) => {
+    const items = await openLayout(page, project, "list");
+
+    await title(page, items[0]).click();
+    const peek = page.getByTestId("issue-peek-overview");
+    await expect(peek).toBeVisible();
+    const editor = peek.locator(".ProseMirror").first();
+    await editor.click();
+    await page.keyboard.type("First line");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("Second line");
+    await page.keyboard.press("ControlOrMeta+Home");
+
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Shift+ArrowDown");
+
+    await expect(bar(page)).toBeHidden();
+  });
+});
