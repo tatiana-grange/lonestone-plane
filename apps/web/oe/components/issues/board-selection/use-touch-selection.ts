@@ -4,8 +4,8 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useRef } from "react";
-import type { MouseEvent, PointerEvent } from "react";
+import { useEffect } from "react";
+import type { MouseEvent as ReactMouseEvent, RefObject } from "react";
 import { useMultipleSelectStore } from "@/hooks/store/use-multiple-select-store";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 
@@ -15,81 +15,92 @@ const MOVE_TOLERANCE_PX = 10;
 const INTERACTIVE_SELECTOR =
   "button, input, select, textarea, [contenteditable='true'], [role='button'], [role='checkbox'], [role='menuitem'], [role='option']";
 
-type TouchSelectionHandlers = {
-  onPointerDown?: (event: PointerEvent) => void;
-  onPointerMove?: (event: PointerEvent) => void;
-  onPointerUp?: () => void;
-  onPointerCancel?: () => void;
-  onContextMenu?: (event: MouseEvent) => void;
-  onClickCapture?: (event: MouseEvent) => void;
-};
-
 /**
- * Touch selection for board cards (no hover, so no checkbox):
+ * Touch selection for board cards (no hover, so no checkbox), wired on the card wrapper, i.e. the
+ * parent of `anchorRef`, with native listeners so that the upstream card stays untouched:
  * - a long press (about 500 ms without moving) toggles the card instead of opening it;
  * - while a selection is active, a tap toggles the card instead of opening it, except on the card's
  *   controls (state, assignees, "..." menu), which keep working.
  * Moving the finger cancels the long press, so scrolling stays free.
  */
 export const useTouchSelection = (params: {
+  anchorRef: RefObject<HTMLElement>;
   helpers: TSelectionHelper | undefined;
   entityID: string;
   groupID: string;
-}): TouchSelectionHandlers => {
-  const { helpers, entityID, groupID } = params;
+}) => {
+  const { anchorRef, helpers, entityID, groupID } = params;
   const { isSelectionActive } = useMultipleSelectStore();
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startRef = useRef<{ x: number; y: number } | null>(null);
-  const lastPointerTypeRef = useRef<string | null>(null);
-  const longPressDoneRef = useRef(false);
 
-  const cancelTimer = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = null;
-  };
+  useEffect(() => {
+    const card = anchorRef.current?.parentElement;
+    if (!card || !helpers || helpers.isSelectionDisabled) return;
 
-  useEffect(() => cancelTimer, []);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let start: { x: number; y: number } | null = null;
+    let lastPointerType: string | null = null;
+    let longPressDone = false;
 
-  if (!helpers || helpers.isSelectionDisabled) return {};
+    // no shift key on touch: handleEntityClick toggles the card
+    const toggle = (event: Event) => helpers.handleEntityClick(event as unknown as ReactMouseEvent, entityID, groupID);
+    const cancelTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = null;
+    };
 
-  return {
-    onPointerDown: (event) => {
-      lastPointerTypeRef.current = event.pointerType;
-      longPressDoneRef.current = false;
+    const onPointerDown = (event: PointerEvent) => {
+      lastPointerType = event.pointerType;
+      longPressDone = false;
       if (event.pointerType !== "touch") return;
-      startRef.current = { x: event.clientX, y: event.clientY };
+      start = { x: event.clientX, y: event.clientY };
       cancelTimer();
-      timerRef.current = setTimeout(() => {
-        timerRef.current = null;
-        longPressDoneRef.current = true;
-        // no shift key on touch: a plain toggle
-        helpers.handleEntityClick(event, entityID, groupID);
+      timer = setTimeout(() => {
+        timer = null;
+        longPressDone = true;
+        toggle(event);
       }, LONG_PRESS_MS);
-    },
-    onPointerMove: (event) => {
-      if (!timerRef.current || !startRef.current) return;
-      const distance = Math.hypot(event.clientX - startRef.current.x, event.clientY - startRef.current.y);
-      if (distance > MOVE_TOLERANCE_PX) cancelTimer();
-    },
-    onPointerUp: cancelTimer,
-    onPointerCancel: cancelTimer,
-    onContextMenu: (event) => {
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      if (!timer || !start) return;
+      if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > MOVE_TOLERANCE_PX) cancelTimer();
+    };
+    const onContextMenu = (event: MouseEvent) => {
       // the long press must not open the native link menu
-      if (lastPointerTypeRef.current === "touch") event.preventDefault();
-    },
-    onClickCapture: (event) => {
-      if (longPressDoneRef.current) {
-        longPressDoneRef.current = false;
+      if (lastPointerType === "touch") event.preventDefault();
+    };
+    // capture phase on the wrapper: runs before the card link opens the work item
+    const onClickCapture = (event: MouseEvent) => {
+      if (longPressDone) {
+        longPressDone = false;
         event.preventDefault();
         event.stopPropagation();
         return;
       }
       const isOnControl = event.target instanceof Element && !!event.target.closest(INTERACTIVE_SELECTOR);
-      if (lastPointerTypeRef.current === "touch" && isSelectionActive && !isOnControl) {
+      if (lastPointerType === "touch" && isSelectionActive && !isOnControl) {
         event.preventDefault();
         event.stopPropagation();
-        helpers.handleEntityClick(event, entityID, groupID);
+        toggle(event);
       }
-    },
-  };
+    };
+
+    // no native "copy / open link" callout on the long press (iOS)
+    card.style.setProperty("-webkit-touch-callout", "none");
+    card.addEventListener("pointerdown", onPointerDown);
+    card.addEventListener("pointermove", onPointerMove);
+    card.addEventListener("pointerup", cancelTimer);
+    card.addEventListener("pointercancel", cancelTimer);
+    card.addEventListener("contextmenu", onContextMenu);
+    card.addEventListener("click", onClickCapture, true);
+    return () => {
+      cancelTimer();
+      card.style.removeProperty("-webkit-touch-callout");
+      card.removeEventListener("pointerdown", onPointerDown);
+      card.removeEventListener("pointermove", onPointerMove);
+      card.removeEventListener("pointerup", cancelTimer);
+      card.removeEventListener("pointercancel", cancelTimer);
+      card.removeEventListener("contextmenu", onContextMenu);
+      card.removeEventListener("click", onClickCapture, true);
+    };
+  }, [anchorRef, helpers, entityID, groupID, isSelectionActive]);
 };

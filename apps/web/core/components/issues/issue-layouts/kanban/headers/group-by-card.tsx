@@ -20,8 +20,6 @@ import { CreateUpdateIssueModal } from "@/components/issues/issue-modal/modal";
 // constants
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import { CreateUpdateEpicModal } from "@/components/epic-modal";
-// plane web components
-import { BoardColumnSelectAction } from "@/plane-web/components/issues/board-selection";
 
 interface IHeaderGroupByCard {
   sub_group_by: TIssueGroupByOptions | undefined;
@@ -114,7 +112,6 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
           verticalAlignPosition ? `w-[44px] flex-col items-center` : `w-full flex-row items-center`
         }`}
       >
-        {!verticalAlignPosition && <BoardColumnSelectAction columnId={column_id} columnTitle={title} />}
         <div className="flex size-5 flex-shrink-0 items-center justify-center overflow-hidden rounded-xs">
           {icon ? icon : <Circle width={14} strokeWidth={2} />}
         </div>

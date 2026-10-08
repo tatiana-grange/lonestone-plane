@@ -24,8 +24,7 @@ import { useProjectCollaboration } from "@/hooks/use-project-collaboration";
 import { useGroupIssuesDragNDrop } from "@/hooks/use-group-dragndrop";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import { useIssuesActions } from "@/hooks/use-issues-actions";
-// plane web components
-import { BoardSelectionRoot } from "@/plane-web/components/issues/board-selection";
+import { BoardSelection } from "@/plane-web/components/issues/board-selection";
 // store
 // ui
 // types
@@ -261,40 +260,39 @@ export const BaseKanBanRoot = observer(function BaseKanBanRoot(props: IBaseKanBa
         </div>
       </div>
       <IssueLayoutHOC layout={EIssueLayoutTypes.KANBAN}>
-        <BoardSelectionRoot containerRef={scrollableContainerRef} groupedIssueIds={groupedIssueIds} isEpic={isEpic}>
-          <div
-            className={`horizontal-scrollbar relative flex scrollbar-lg h-full w-full bg-surface-2 ${sub_group_by ? "vertical-scrollbar overflow-y-auto" : "overflow-x-auto overflow-y-hidden"}`}
-            ref={scrollableContainerRef}
-          >
-            <div className="relative h-full w-max min-w-full bg-surface-2">
-              <div className="h-full w-max">
-                <KanBanView
-                  issuesMap={issueMap}
-                  groupedIssueIds={groupedIssueIds ?? {}}
-                  getGroupIssueCount={issues.getGroupIssueCount}
-                  displayProperties={displayProperties}
-                  sub_group_by={sub_group_by}
-                  group_by={group_by}
-                  orderBy={orderBy}
-                  updateIssue={updateIssue}
-                  quickActions={renderQuickActions}
-                  handleCollapsedGroups={handleCollapsedGroups}
-                  collapsedGroups={collapsedGroups}
-                  enableQuickIssueCreate={enableQuickAdd}
-                  showEmptyGroup={userDisplayFilters?.show_empty_groups ?? true}
-                  quickAddCallback={quickAddIssue}
-                  disableIssueCreation={!enableIssueCreation || !isEditingAllowed || isCompletedCycle}
-                  canEditProperties={canEditProperties}
-                  addIssuesToView={addIssuesToView}
-                  scrollableContainerRef={scrollableContainerRef}
-                  handleOnDrop={handleOnDrop}
-                  loadMoreIssues={fetchMoreIssues}
-                  isEpic={isEpic}
-                />
-              </div>
+        <div
+          className={`horizontal-scrollbar relative flex scrollbar-lg h-full w-full bg-surface-2 ${sub_group_by ? "vertical-scrollbar overflow-y-auto" : "overflow-x-auto overflow-y-hidden"}`}
+          ref={scrollableContainerRef}
+        >
+          <div className="relative h-full w-max min-w-full bg-surface-2">
+            <div className="h-full w-max">
+              <KanBanView
+                issuesMap={issueMap}
+                groupedIssueIds={groupedIssueIds ?? {}}
+                getGroupIssueCount={issues.getGroupIssueCount}
+                displayProperties={displayProperties}
+                sub_group_by={sub_group_by}
+                group_by={group_by}
+                orderBy={orderBy}
+                updateIssue={updateIssue}
+                quickActions={renderQuickActions}
+                handleCollapsedGroups={handleCollapsedGroups}
+                collapsedGroups={collapsedGroups}
+                enableQuickIssueCreate={enableQuickAdd}
+                showEmptyGroup={userDisplayFilters?.show_empty_groups ?? true}
+                quickAddCallback={quickAddIssue}
+                disableIssueCreation={!enableIssueCreation || !isEditingAllowed || isCompletedCycle}
+                canEditProperties={canEditProperties}
+                addIssuesToView={addIssuesToView}
+                scrollableContainerRef={scrollableContainerRef}
+                handleOnDrop={handleOnDrop}
+                loadMoreIssues={fetchMoreIssues}
+                isEpic={isEpic}
+              />
             </div>
           </div>
-        </BoardSelectionRoot>
+        </div>
+        <BoardSelection containerRef={scrollableContainerRef} groupedIssueIds={groupedIssueIds} isEpic={isEpic} />
       </IssueLayoutHOC>
     </>
   );

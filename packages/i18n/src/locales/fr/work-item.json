@@ -329,7 +329,6 @@
     },
     "selected_count": "{count, plural, one{# sélectionné} many{# sélectionnés} other{# sélectionnés}}",
     "clear_selection": "Effacer la sélection",
-    "select_column": "Tout sélectionner dans {column}",
     "clear_start_date": "Effacer la date de début",
     "clear_due_date": "Effacer la date d'échéance",
     "toast": {

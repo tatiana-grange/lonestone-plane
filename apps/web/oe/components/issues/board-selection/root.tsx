@@ -4,31 +4,42 @@
  * See the LICENSE file for details.
  */
 
-import type { MutableRefObject, ReactNode } from "react";
+import { useEffect } from "react";
+import type { MutableRefObject } from "react";
 import { observer } from "mobx-react";
 import type { TGroupedIssues, TSubGroupedIssues } from "@plane/types";
 // components
 import { MultipleSelectGroup } from "@/components/core/multiple-select";
 import { isSubGrouped } from "@/components/issues/issue-layouts/utils";
+import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 // hooks
 import { useBulkOperationStatus } from "@/plane-web/hooks/use-bulk-operation-status";
 // plane web components
 import { IssueBulkOperationsRoot } from "@/plane-web/components/issues/bulk-operations";
-import { BoardSelectionProvider, getBoardCellGroupId } from "./context";
+import { getBoardCellGroupId, setBoardSelectionHelpers } from "./helpers-store";
 
 type Props = {
-  children: ReactNode;
   containerRef: MutableRefObject<HTMLDivElement | null>;
   groupedIssueIds: TGroupedIssues | TSubGroupedIssues | undefined;
   isEpic?: boolean;
 };
 
+/** Hands the current helpers to the cards (see helpers-store), and clears them when the board goes away. */
+function PublishBoardSelectionHelpers(props: { helpers: TSelectionHelper }) {
+  const { helpers } = props;
+  useEffect(() => {
+    setBoardSelectionHelpers(helpers);
+  }, [helpers]);
+  useEffect(() => () => setBoardSelectionHelpers(undefined), []);
+  return null;
+}
+
 /**
- * Board multi-select: wraps the board's scroll container with the selection group, shares the
- * selection helpers with cards and column headers, and renders the bulk bar below the board.
+ * Board multi-select, rendered next to the board's scroll container: builds the selection groups,
+ * shares the selection helpers with the cards and renders the bulk bar over the bottom of the board.
  */
-export const BoardSelectionRoot = observer(function BoardSelectionRoot(props: Props) {
-  const { children, containerRef, groupedIssueIds, isEpic = false } = props;
+export const BoardSelection = observer(function BoardSelection(props: Props) {
+  const { containerRef, groupedIssueIds, isEpic = false } = props;
   const isBulkOperationsEnabled = useBulkOperationStatus();
 
   // Selection groups: one per column, or per column x swimlane cell when sub-grouped.
@@ -54,13 +65,11 @@ export const BoardSelectionRoot = observer(function BoardSelectionRoot(props: Pr
       disabled={!isBulkOperationsEnabled || isEpic}
     >
       {(helpers) => (
-        <BoardSelectionProvider helpers={helpers} groupIds={Object.keys(selectionEntities)}>
-          {/* the board's scroll container shrinks (it has an overflow) to leave room for the bar */}
-          <div className="relative flex h-full w-full flex-col">
-            {children}
-            <IssueBulkOperationsRoot selectionHelpers={helpers} />
-          </div>
-        </BoardSelectionProvider>
+        <>
+          <PublishBoardSelectionHelpers helpers={helpers} />
+          {/* the board fills its container: the bar sits over its bottom edge */}
+          <IssueBulkOperationsRoot className="absolute right-0" selectionHelpers={helpers} />
+        </>
       )}
     </MultipleSelectGroup>
   );
