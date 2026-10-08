@@ -326,25 +326,6 @@
         "title": "无法更新工作项",
         "message": "某些工作项的状态更改不被允许。请确保状态更改是被允许的。"
       }
-    },
-    "selected_count": "{count, plural, one{已选择 # 项} other{已选择 # 项}}",
-    "clear_selection": "清除选择",
-    "select_item": "选择 {identifier}",
-    "select_column": "全选 {column} 中的项",
-    "clear_start_date": "清除开始日期",
-    "clear_due_date": "清除截止日期",
-    "toast": {
-      "success_title": "工作项已更新",
-      "success_message": "{count, plural, one{已更新 # 个工作项} other{已更新 # 个工作项}}",
-      "partial_title": "部分工作项未更新",
-      "partial_message": "已更新 {updated} 个，{failed} 个未更新",
-      "error_title": "无法更新工作项",
-      "error_message": "出现问题。没有工作项被更新。"
-    },
-    "failure_reasons": {
-      "not_found": "{count, plural, one{# 个已不可用} other{# 个已不可用}}",
-      "invalid_date_range": "{count, plural, one{# 个的开始日期晚于截止日期} other{# 个的开始日期晚于截止日期}}",
-      "request_failed": "{count, plural, one{# 个因出错未发送} other{# 个因出错未发送}}"
     }
   },
   "recurring_work_items": {

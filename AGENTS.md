@@ -15,7 +15,6 @@
 
 - **Backend**: All custom Django code goes in `apps/api/plane/extended/` (`plane.extended`). APIs under `/api/extended/`, DB tables `extended_*`. Do not add new top-level apps or fork migrations under `plane.db`. Details: `docs/architecture/fork-maintenance.md`.
 - **Frontend**: Edition UI/stores live in `apps/web/oe/` (`@/plane-web/*`). Fork-only routes in `apps/web/app/routes/extended.ts`.
-- **Touching upstream code**: Avoid `apps/web/core/` and `packages/`. When a change there is unavoidable, keep it to a few lines, add the file to "Core files touched by fork features" in `docs/architecture/extending-models-and-components.md` in the same commit, and silence existing upstream lint warnings with `oxlint-disable-next-line` instead of fixing them.
 
 ## Code Style
 

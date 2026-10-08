@@ -326,25 +326,6 @@
         "title": "Tidak dapat memperbarui item kerja",
         "message": "Perubahan status tidak diizinkan untuk beberapa item kerja. Pastikan perubahan status diizinkan."
       }
-    },
-    "selected_count": "{count, plural, one{# dipilih} other{# dipilih}}",
-    "clear_selection": "Hapus pilihan",
-    "select_item": "Pilih {identifier}",
-    "select_column": "Pilih semua di {column}",
-    "clear_start_date": "Hapus tanggal mulai",
-    "clear_due_date": "Hapus tanggal jatuh tempo",
-    "toast": {
-      "success_title": "Item kerja diperbarui",
-      "success_message": "{count, plural, one{# item kerja diperbarui} other{# item kerja diperbarui}}",
-      "partial_title": "Beberapa item kerja tidak diperbarui",
-      "partial_message": "{updated} diperbarui, {failed} tidak diperbarui",
-      "error_title": "Tidak dapat memperbarui item kerja",
-      "error_message": "Terjadi kesalahan. Tidak ada item kerja yang diperbarui."
-    },
-    "failure_reasons": {
-      "not_found": "{count, plural, one{# tidak lagi tersedia} other{# tidak lagi tersedia}}",
-      "invalid_date_range": "{count, plural, one{# dengan tanggal mulai setelah tanggal jatuh tempo} other{# dengan tanggal mulai setelah tanggal jatuh tempo}}",
-      "request_failed": "{count, plural, one{# tidak terkirim setelah terjadi kesalahan} other{# tidak terkirim setelah terjadi kesalahan}}"
     }
   },
   "recurring_work_items": {

@@ -326,25 +326,6 @@
         "title": "İş öğeleri güncellenemiyor",
         "message": "Bazı iş öğeleri için durum değişikliğine izin verilmiyor. Durum değişikliğine izin verildiğinden emin olun."
       }
-    },
-    "selected_count": "{count, plural, one{# seçildi} other{# seçildi}}",
-    "clear_selection": "Seçimi temizle",
-    "select_item": "{identifier} öğesini seç",
-    "select_column": "{column} içindekilerin tümünü seç",
-    "clear_start_date": "Başlangıç tarihini temizle",
-    "clear_due_date": "Son tarihi temizle",
-    "toast": {
-      "success_title": "İş öğeleri güncellendi",
-      "success_message": "{count, plural, one{# iş öğesi güncellendi} other{# iş öğesi güncellendi}}",
-      "partial_title": "Bazı iş öğeleri güncellenmedi",
-      "partial_message": "{updated} güncellendi, {failed} güncellenmedi",
-      "error_title": "İş öğeleri güncellenemiyor",
-      "error_message": "Bir şeyler ters gitti. Hiçbir iş öğesi güncellenmedi."
-    },
-    "failure_reasons": {
-      "not_found": "{count, plural, one{# artık kullanılamıyor} other{# artık kullanılamıyor}}",
-      "invalid_date_range": "{count, plural, one{# öğenin başlangıç tarihi son tarihten sonra} other{# öğenin başlangıç tarihi son tarihten sonra}}",
-      "request_failed": "{count, plural, one{# bir hata nedeniyle gönderilmedi} other{# bir hata nedeniyle gönderilmedi}}"
     }
   },
   "recurring_work_items": {

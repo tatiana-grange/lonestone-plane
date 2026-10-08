@@ -326,25 +326,6 @@
         "title": "Impossibile aggiornare gli elementi di lavoro",
         "message": "Il cambiamento di stato non è consentito per alcuni elementi di lavoro. Assicurati che il cambiamento di stato sia consentito."
       }
-    },
-    "selected_count": "{count, plural, one{# selezionato} many{# selezionati} other{# selezionati}}",
-    "clear_selection": "Cancella selezione",
-    "select_item": "Seleziona {identifier}",
-    "select_column": "Seleziona tutto in {column}",
-    "clear_start_date": "Cancella data di inizio",
-    "clear_due_date": "Cancella scadenza",
-    "toast": {
-      "success_title": "Elementi di lavoro aggiornati",
-      "success_message": "{count, plural, one{# elemento di lavoro aggiornato} many{# elementi di lavoro aggiornati} other{# elementi di lavoro aggiornati}}",
-      "partial_title": "Alcuni elementi di lavoro non sono stati aggiornati",
-      "partial_message": "{updated} aggiornati, {failed} non aggiornati",
-      "error_title": "Impossibile aggiornare gli elementi di lavoro",
-      "error_message": "Qualcosa è andato storto. Nessun elemento di lavoro è stato aggiornato."
-    },
-    "failure_reasons": {
-      "not_found": "{count, plural, one{# non più disponibile} many{# non più disponibili} other{# non più disponibili}}",
-      "invalid_date_range": "{count, plural, one{# con data di inizio successiva alla scadenza} many{# con data di inizio successiva alla scadenza} other{# con data di inizio successiva alla scadenza}}",
-      "request_failed": "{count, plural, one{# non inviato dopo un errore} many{# non inviati dopo un errore} other{# non inviati dopo un errore}}"
     }
   },
   "recurring_work_items": {

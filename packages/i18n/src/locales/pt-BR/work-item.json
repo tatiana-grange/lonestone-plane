@@ -326,25 +326,6 @@
         "title": "Não é possível atualizar itens de trabalho",
         "message": "A mudança de estado não é permitida para alguns itens de trabalho. Certifique-se de que a mudança de estado seja permitida."
       }
-    },
-    "selected_count": "{count, plural, one{# selecionado} many{# selecionados} other{# selecionados}}",
-    "clear_selection": "Limpar seleção",
-    "select_item": "Selecionar {identifier}",
-    "select_column": "Selecionar tudo em {column}",
-    "clear_start_date": "Limpar data de início",
-    "clear_due_date": "Limpar data de vencimento",
-    "toast": {
-      "success_title": "Itens de trabalho atualizados",
-      "success_message": "{count, plural, one{# item de trabalho atualizado} many{# itens de trabalho atualizados} other{# itens de trabalho atualizados}}",
-      "partial_title": "Alguns itens de trabalho não foram atualizados",
-      "partial_message": "{updated} atualizados, {failed} não atualizados",
-      "error_title": "Não é possível atualizar itens de trabalho",
-      "error_message": "Algo deu errado. Nenhum item de trabalho foi atualizado."
-    },
-    "failure_reasons": {
-      "not_found": "{count, plural, one{# não está mais disponível} many{# não estão mais disponíveis} other{# não estão mais disponíveis}}",
-      "invalid_date_range": "{count, plural, one{# com data de início posterior à data de vencimento} many{# com data de início posterior à data de vencimento} other{# com data de início posterior à data de vencimento}}",
-      "request_failed": "{count, plural, one{# não enviado após um erro} many{# não enviados após um erro} other{# não enviados após um erro}}"
     }
   },
   "recurring_work_items": {

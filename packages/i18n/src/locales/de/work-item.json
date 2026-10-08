@@ -326,25 +326,6 @@
         "title": "Arbeitsaufgaben können nicht aktualisiert werden",
         "message": "Statusänderung ist für einige Arbeitsaufgaben nicht erlaubt. Stellen Sie sicher, dass die Statusänderung zulässig ist."
       }
-    },
-    "selected_count": "{count, plural, one{# ausgewählt} other{# ausgewählt}}",
-    "clear_selection": "Auswahl aufheben",
-    "select_item": "{identifier} auswählen",
-    "select_column": "Alle in {column} auswählen",
-    "clear_start_date": "Startdatum löschen",
-    "clear_due_date": "Fälligkeitsdatum löschen",
-    "toast": {
-      "success_title": "Arbeitsaufgaben aktualisiert",
-      "success_message": "{count, plural, one{# Arbeitsaufgabe aktualisiert} other{# Arbeitsaufgaben aktualisiert}}",
-      "partial_title": "Einige Arbeitsaufgaben wurden nicht aktualisiert",
-      "partial_message": "{updated} aktualisiert, {failed} nicht aktualisiert",
-      "error_title": "Arbeitsaufgaben können nicht aktualisiert werden",
-      "error_message": "Etwas ist schiefgelaufen. Es wurde keine Arbeitsaufgabe aktualisiert."
-    },
-    "failure_reasons": {
-      "not_found": "{count, plural, one{# nicht mehr verfügbar} other{# nicht mehr verfügbar}}",
-      "invalid_date_range": "{count, plural, one{# mit Startdatum nach dem Fälligkeitsdatum} other{# mit Startdatum nach dem Fälligkeitsdatum}}",
-      "request_failed": "{count, plural, one{# nach einem Fehler nicht gesendet} other{# nach einem Fehler nicht gesendet}}"
     }
   },
   "recurring_work_items": {

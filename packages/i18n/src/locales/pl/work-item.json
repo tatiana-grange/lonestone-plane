@@ -326,25 +326,6 @@
         "title": "Nie można zaktualizować elementów pracy",
         "message": "Zmiana stanu nie jest dozwolona dla niektórych elementów pracy. Upewnij się, że zmiana stanu jest dozwolona."
       }
-    },
-    "selected_count": "{count, plural, one{# zaznaczony} few{# zaznaczone} many{# zaznaczonych} other{# zaznaczonego}}",
-    "clear_selection": "Wyczyść zaznaczenie",
-    "select_item": "Zaznacz {identifier}",
-    "select_column": "Zaznacz wszystko w {column}",
-    "clear_start_date": "Wyczyść datę rozpoczęcia",
-    "clear_due_date": "Wyczyść termin",
-    "toast": {
-      "success_title": "Zaktualizowano elementy pracy",
-      "success_message": "{count, plural, one{Zaktualizowano # element pracy} few{Zaktualizowano # elementy pracy} many{Zaktualizowano # elementów pracy} other{Zaktualizowano # elementu pracy}}",
-      "partial_title": "Niektóre elementy pracy nie zostały zaktualizowane",
-      "partial_message": "Zaktualizowano: {updated}, niezaktualizowano: {failed}",
-      "error_title": "Nie można zaktualizować elementów pracy",
-      "error_message": "Coś poszło nie tak. Żaden element pracy nie został zaktualizowany."
-    },
-    "failure_reasons": {
-      "not_found": "{count, plural, one{# nie jest już dostępny} few{# nie są już dostępne} many{# nie jest już dostępnych} other{# nie jest już dostępnego}}",
-      "invalid_date_range": "{count, plural, one{# z datą rozpoczęcia po terminie} few{# z datą rozpoczęcia po terminie} many{# z datą rozpoczęcia po terminie} other{# z datą rozpoczęcia po terminie}}",
-      "request_failed": "{count, plural, one{# nie został wysłany z powodu błędu} few{# nie zostały wysłane z powodu błędu} many{# nie zostało wysłanych z powodu błędu} other{# nie zostało wysłanych z powodu błędu}}"
     }
   },
   "recurring_work_items": {
