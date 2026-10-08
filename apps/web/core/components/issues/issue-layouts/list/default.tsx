@@ -111,7 +111,6 @@ export const List = observer(function List(props: IList) {
 
   const getGroupIndex = (groupId: string | undefined) => groups.findIndex(({ id }) => id === groupId);
 
-  // oxlint-disable-next-line no-unneeded-ternary -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file
   const is_list = group_by === null ? true : false;
 
   // create groupIds array and entities object for bulk ops

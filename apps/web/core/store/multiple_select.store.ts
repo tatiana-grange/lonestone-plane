@@ -140,7 +140,6 @@ export class MultipleSelectStore implements IMultipleSelectStore {
    * @param {TEntityDetails} entityDetails
    * @param {"add" | "remove"} action
    */
-  // oxlint-disable-next-line no-shadow -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file
   updateSelectedEntityDetails = (entityDetails: TEntityDetails, action: "add" | "remove") => {
     if (action === "add") {
       runInAction(() => {
@@ -165,7 +164,6 @@ export class MultipleSelectStore implements IMultipleSelectStore {
    * @param {TEntityDetails[]} entitiesList
    * @param {"add" | "remove"} action
    */
-  // oxlint-disable-next-line no-shadow -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file
   bulkUpdateSelectedEntityDetails = (entitiesList: TEntityDetails[], action: "add" | "remove") => {
     if (action === "add") {
       runInAction(() => {

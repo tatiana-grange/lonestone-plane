@@ -71,7 +71,6 @@ export const useMultipleSelect = (props: Props) => {
 
   const entitiesList: TEntityDetails[] = useMemo(
     () =>
-      // oxlint-disable-next-line eslint-plugin-unicorn/prefer-array-flat-map -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file
       groups
         ?.map((groupID) =>
           entities?.[groupID]?.map((entityID) => ({
