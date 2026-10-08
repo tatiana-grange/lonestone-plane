@@ -11,7 +11,7 @@ import type { TGroupedIssues, TSubGroupedIssues } from "@plane/types";
 import { MultipleSelectGroup } from "@/components/core/multiple-select";
 import { isSubGrouped } from "@/components/issues/issue-layouts/utils";
 // hooks
-import { useBulkOperationStatus } from "@/hooks/use-bulk-operation-status";
+import { useBulkOperationStatus } from "@/plane-web/hooks/use-bulk-operation-status";
 // plane web components
 import { IssueBulkOperationsRoot } from "@/plane-web/components/issues/bulk-operations";
 import { BoardSelectionProvider, getBoardCellGroupId } from "./context";

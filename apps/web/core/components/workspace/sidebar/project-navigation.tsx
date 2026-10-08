@@ -153,9 +153,8 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
     };
 
     // sort navigation items by sortOrder
-    // sorts a fresh copy: Array#toSorted is ES2023, beyond the app's ES2022 target (not polyfilled)
-    // oxlint-disable-next-line eslint-plugin-unicorn/no-array-sort
-    const sortedNavigationItems = [...navigationItems(workspaceSlug, projectId)].sort(
+    // oxlint-disable-next-line eslint-plugin-unicorn/no-array-sort -- upstream code (toSorted is ES2023, beyond the app's ES2022 target)
+    const sortedNavigationItems = navigationItems(workspaceSlug, projectId).sort(
       (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)
     );
 

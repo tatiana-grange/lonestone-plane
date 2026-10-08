@@ -52,7 +52,6 @@ export const ModuleOptions = observer(function ModuleOptions(props: Props) {
     if (isOpen) {
       onOpen();
       if (!isMobile) {
-        // oxlint-disable-next-line no-unused-expressions -- upstream code, left as is to keep upstream merges clean
         inputRef.current && inputRef.current.focus();
       }
     }

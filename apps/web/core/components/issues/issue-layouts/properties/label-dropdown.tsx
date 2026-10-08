@@ -99,7 +99,6 @@ export function LabelDropdown(props: ILabelDropdownProps) {
 
   const options = useMemo(
     () =>
-      // oxlint-disable-next-line no-shadow -- upstream code, left as is to keep upstream merges clean
       projectLabels.map((label) => ({
         value: label?.id,
         query: label?.name,
@@ -164,7 +163,6 @@ export function LabelDropdown(props: ILabelDropdownProps) {
   const handleAddLabel = async (labelName: string) => {
     if (!projectId) return;
     setSubmitting(true);
-    // oxlint-disable-next-line no-shadow -- upstream code, left as is to keep upstream merges clean
     const label = await createLabel(workspaceSlug, projectId, { name: labelName, color: getRandomLabelColor() });
     onChange([...value, label.id]);
     setQuery("");
@@ -234,16 +232,13 @@ export function LabelDropdown(props: ILabelDropdownProps) {
     ]
   );
 
-  // oxlint-disable-next-line eslint-plugin-unicorn/consistent-function-scoping -- upstream code, left as is to keep upstream merges clean
   const preventPropagation = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
     e.preventDefault();
   };
 
   return (
-    // oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, left as is to keep upstream merges clean
     <div className={`${fullHeight ? "h-full" : "h-5"}`} onClick={preventPropagation}>
-      {/* oxlint-disable-next-line eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, left as is to keep upstream merges clean */}
       <ComboDropDown
         as="div"
         ref={dropdownRef}
@@ -311,7 +306,6 @@ export function LabelDropdown(props: ILabelDropdownProps) {
                 ) : submitting ? (
                   <Loader className="h-3.5 w-3.5 animate-spin" />
                 ) : canCreateLabel ? (
-                  // oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events -- upstream code, left as is to keep upstream merges clean
                   <p
                     onClick={() => {
                       if (!query.length) return;

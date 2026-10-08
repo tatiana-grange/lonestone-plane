@@ -78,11 +78,9 @@ export const MemberOptions = observer(function MemberOptions(props: Props) {
     if (isOpen) {
       onDropdownOpen?.();
       if (!isMobile) {
-        // oxlint-disable-next-line no-unused-expressions -- upstream code, left as is to keep upstream merges clean
         inputRef.current && inputRef.current.focus();
       }
     }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- upstream code, left as is to keep upstream merges clean
   }, [isOpen, isMobile]);
 
   const searchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
