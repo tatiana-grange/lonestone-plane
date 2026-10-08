@@ -10,12 +10,11 @@ import { observer } from "mobx-react";
 import type { TGroupedIssues, TSubGroupedIssues } from "@plane/types";
 // components
 import { MultipleSelectGroup } from "@/components/core/multiple-select";
+import { IssueBulkOperationsRoot } from "@/components/issues/bulk-operations";
 import { isSubGrouped } from "@/components/issues/issue-layouts/utils";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 // hooks
 import { useBulkOperationStatus } from "@/plane-web/hooks/use-bulk-operation-status";
-// plane web components
-import { IssueBulkOperationsRoot } from "@/plane-web/components/issues/bulk-operations";
 import { getBoardCellGroupId, setBoardSelectionHelpers } from "./helpers-store";
 
 type Props = {

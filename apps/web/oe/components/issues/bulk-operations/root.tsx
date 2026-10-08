@@ -16,7 +16,6 @@ import { useIssues } from "@/hooks/store/use-issues";
 import { useMultipleSelectStore } from "@/hooks/store/use-multiple-select-store";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
-import { useBulkOperationStatus } from "@/plane-web/hooks/use-bulk-operation-status";
 import { BulkPropertiesBar } from "./properties";
 
 // Mirrors the API limit of work items per request.
@@ -58,19 +57,21 @@ const showBulkResultToast = (response: TBulkOperationsResponse, t: TTranslate, n
   });
 };
 
-export const IssueBulkOperationsRoot = observer(function IssueBulkOperationsRoot(props: Props) {
+/**
+ * Bulk actions bar. Rendered by the upstream `IssueBulkOperationsRoot` in place of its "Upgrade"
+ * banner, once a selection is active and enabled.
+ */
+export const BulkOperationsBar = observer(function BulkOperationsBar(props: Props) {
   const { className, selectionHelpers } = props;
   const { workspaceSlug, projectId } = useParams();
   const { t } = useTranslation();
   // store hooks
-  const { isSelectionActive, selectedEntityIds } = useMultipleSelectStore();
+  const { selectedEntityIds } = useMultipleSelectStore();
   const storeType = useIssueStoreType();
   const { issues } = useIssues(storeType);
-  const isBulkOperationsEnabled = useBulkOperationStatus();
   // states
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isVisible = isSelectionActive && !selectionHelpers.isSelectionDisabled && isBulkOperationsEnabled;
   const { handleClearSelection } = selectionHelpers;
 
   const applyProperty = useCallback(
@@ -116,7 +117,7 @@ export const IssueBulkOperationsRoot = observer(function IssueBulkOperationsRoot
     [issues, projectId, selectedEntityIds, t, workspaceSlug]
   );
 
-  if (!isVisible || !projectId) return null;
+  if (!projectId) return null;
 
   return (
     <div className={cn("sticky bottom-0 left-0 z-[2] grid h-20 place-items-center px-3.5", className)}>
