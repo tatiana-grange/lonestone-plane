@@ -79,10 +79,7 @@ export const BulkTriStateMenu = observer(function BulkTriStateMenu(props: Props)
             <span className="truncate">{label}</span>
             <ChevronDown className="size-2.5 flex-shrink-0" aria-hidden="true" />
           </Popover.Button>
-          <Popover.Panel
-            data-testid="bulk-tri-state-menu"
-            className="absolute bottom-full left-0 z-20 mb-1 w-56 rounded-md border-[0.5px] border-subtle bg-surface-1 p-1 shadow-raised-200"
-          >
+          <Popover.Panel className="absolute bottom-full left-0 z-20 mb-1 w-56 rounded-md border-[0.5px] border-subtle bg-surface-1 p-1 shadow-raised-200">
             <input
               type="text"
               value={query}
