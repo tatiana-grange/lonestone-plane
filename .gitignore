@@ -117,8 +117,3 @@ packages/i18n/src/types/keys.generated.ts
 
 # Local security notes (not for version control)
 /security/
-
-# Spec Kit (local tooling)
-/.specify/
-/.claude/skills/speckit-*/
-/specs/

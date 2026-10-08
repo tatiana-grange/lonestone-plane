@@ -83,7 +83,6 @@ function main(): void {
   const jsonFiles = fs
     .readdirSync(localesDir)
     .filter((file) => file.endsWith(".json"))
-    // oxlint-disable-next-line eslint-plugin-unicorn/no-array-sort -- upstream code
     .sort();
 
   if (jsonFiles.length === 0) {
@@ -134,7 +133,6 @@ function main(): void {
   }
 
   // Detect path conflicts
-  // oxlint-disable-next-line eslint-plugin-unicorn/no-array-sort -- upstream code
   const sortedKeys = [...allKeys].sort();
   const pathConflicts = detectPathConflicts(sortedKeys);
 
@@ -160,7 +158,8 @@ function main(): void {
 // Run: pnpm run generate:types
 
 export type TTranslationKeys =
-${keyLines};
+${keyLines}
+  ;
 `;
 
   fs.writeFileSync(outputFile, output, "utf-8");

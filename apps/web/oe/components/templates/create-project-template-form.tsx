@@ -7,7 +7,6 @@
 import { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import type { DefaultValues } from "react-hook-form";
 import { ETabIndices } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
 import { Button } from "@plane/propel/button";
@@ -45,10 +44,7 @@ const FEATURE_DEFAULTS = {
   inbox_view: false,
 };
 
-// Default values are partial (like the create-project form): they only feed useForm/reset.
-type TTemplateFormDefaults = DefaultValues<TCreateProjectTemplateFormValues>;
-
-const getDefaultFormValues = (): TTemplateFormDefaults => ({
+const getDefaultFormValues = (): TCreateProjectTemplateFormValues => ({
   ...getProjectFormValues(),
   ...FEATURE_DEFAULTS,
   // Identifier is a create-project field, not part of templates (Plane docs).
@@ -62,7 +58,7 @@ const getDefaultFormValues = (): TTemplateFormDefaults => ({
 const getFormValuesFromSnapshot = (
   snapshot: TProjectTemplateSnapshot,
   projectId: string | null = null
-): TTemplateFormDefaults => {
+): TCreateProjectTemplateFormValues => {
   const projectLead =
     snapshot.project_lead && typeof snapshot.project_lead === "object" && "id" in snapshot.project_lead
       ? String(snapshot.project_lead.id)
@@ -88,7 +84,7 @@ const getFormValuesFromSnapshot = (
   };
 };
 
-const getFormValuesFromTemplate = (template: TProjectTemplate): TTemplateFormDefaults => {
+const getFormValuesFromTemplate = (template: TProjectTemplate): TCreateProjectTemplateFormValues => {
   const snapshot = template.template_data?.[0];
   if (!snapshot) {
     return {
