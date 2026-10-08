@@ -5,7 +5,6 @@
  */
 
 import { observer } from "mobx-react";
-import { useTranslation } from "@plane/i18n";
 import { cn } from "@plane/utils";
 import { MultipleSelectEntityAction } from "@/components/core/multiple-select";
 import { useBoardSelection } from "./context";
@@ -13,14 +12,12 @@ import { useBoardSelection } from "./context";
 type Props = {
   issueId: string;
   groupId: string;
-  identifier: string;
   className?: string;
 };
 
 /** Card checkbox: revealed on hover or keyboard focus, always visible once selected, hidden on touch screens. */
 export const BoardCardSelectAction = observer(function BoardCardSelectAction(props: Props) {
-  const { issueId, groupId, identifier, className } = props;
-  const { t } = useTranslation();
+  const { issueId, groupId, className } = props;
   const helpers = useBoardSelection();
 
   if (!helpers || helpers.isSelectionDisabled) return null;
@@ -40,7 +37,6 @@ export const BoardCardSelectAction = observer(function BoardCardSelectAction(pro
         id={issueId}
         groupId={groupId}
         selectionHelpers={helpers}
-        aria-label={t("bulk_operations.select_item", { identifier })}
       />
     </span>
   );

@@ -31,8 +31,6 @@ import { useProject } from "@/hooks/store/use-project";
 import useIssuePeekOverviewRedirection from "@/hooks/use-issue-peek-overview-redirection";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 import { usePlatformOS } from "@/hooks/use-platform-os";
-// plane web
-import { getSelectionClickCaptureHandler } from "@/plane-web/components/issues/selection";
 // local components
 import type { TRenderQuickActions } from "../list/list-view-types";
 import { isIssueNew } from "../utils";
@@ -215,7 +213,7 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
   useOutsideClickDetector(menuActionRef, () => setIsMenuActive(false));
 
   const customActionButton = (
-    // oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, left as is to keep upstream merges clean
+    // oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file
     <div
       ref={menuActionRef}
       className={`flex h-full w-full cursor-pointer items-center rounded-sm p-1 text-placeholder hover:bg-layer-1 ${
@@ -265,14 +263,6 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
         id={`issue-${issueId}`}
         ref={cellRef}
         tabIndex={0}
-        data-selection-entity-id={issueId}
-        data-selection-group-id={SPREADSHEET_SELECT_GROUP}
-        onClickCapture={
-          // cmd/ctrl + click selects instead of opening a new tab
-          canSelectIssues
-            ? getSelectionClickCaptureHandler(selectionHelpers, issueId, SPREADSHEET_SELECT_GROUP)
-            : undefined
-        }
         className="group/list-block relative left-0 z-10 max-w-lg bg-surface-1 md:sticky"
       >
         <ControlLink
@@ -379,7 +369,7 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
                     </Tooltip>
                   </div>
                 </div>
-                {/* oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, left as is to keep upstream merges clean */}
+                {/* oxlint-disable-next-line eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file */}
                 <div
                   className={`opacity-0 transition-opacity group-hover:opacity-100 ${isMenuActive ? "!opacity-100" : ""}`}
                   onClick={(e) => e.stopPropagation()}

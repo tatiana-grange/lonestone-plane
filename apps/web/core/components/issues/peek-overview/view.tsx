@@ -138,8 +138,6 @@ export const IssueView = observer(function IssueView(props: IIssueView) {
       {issueId && (
         <div
           ref={issuePeekOverviewRef}
-          // a floating peek closes on Escape: the selection shortcuts leave that key to it
-          data-selection-overlay={!embedIssue || undefined}
           className={peekOverviewIssueClassName}
           style={{
             boxShadow:

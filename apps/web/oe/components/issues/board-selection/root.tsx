@@ -31,8 +31,7 @@ export const BoardSelectionRoot = observer(function BoardSelectionRoot(props: Pr
   const { children, containerRef, groupedIssueIds, isEpic = false } = props;
   const isBulkOperationsEnabled = useBulkOperationStatus();
 
-  // Selection groups: one per column, or per column x swimlane cell when sub-grouped, so a shift +
-  // click range stays within a cell. Only the order of cards inside a cell matters.
+  // Selection groups: one per column, or per column x swimlane cell when sub-grouped.
   // Built on every render, like the list layout: groupedIssueIds is a MobX object mutated in place, so
   // a memo on its reference would keep stale groups once cards move between columns.
   const selectionEntities: Record<string, string[]> = {};
@@ -53,7 +52,6 @@ export const BoardSelectionRoot = observer(function BoardSelectionRoot(props: Pr
       containerRef={containerRef}
       entities={selectionEntities}
       disabled={!isBulkOperationsEnabled || isEpic}
-      rangeScope="group"
     >
       {(helpers) => (
         <BoardSelectionProvider helpers={helpers} groupIds={Object.keys(selectionEntities)}>

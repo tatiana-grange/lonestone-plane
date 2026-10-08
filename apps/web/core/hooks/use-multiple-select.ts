@@ -19,8 +19,6 @@ type Props = {
   containerRef: React.MutableRefObject<HTMLElement | null>;
   disabled: boolean;
   entities: Record<string, string[]>; // { groupID: entityIds[] }
-  // "group": shift + click only builds a range within one group (e.g. a board column)
-  rangeScope?: "all" | "group";
 };
 
 export type TSelectionSnapshot = {
@@ -36,17 +34,10 @@ export type TSelectionHelper = {
   handleGroupClick: (groupID: string) => void;
   isGroupSelected: (groupID: string) => "empty" | "partial" | "complete";
   isSelectionDisabled: boolean;
-  // fork: primitives for the selection actions in @/plane-web/components/issues/selection
-  entitiesList: TEntityDetails[];
-  handleEntitySelection: (
-    entityDetails: TEntityDetails | TEntityDetails[],
-    shouldScroll?: boolean,
-    forceAction?: "force-add" | "force-remove" | null
-  ) => void;
 };
 
 export const useMultipleSelect = (props: Props) => {
-  const { containerRef, disabled, entities, rangeScope = "all" } = props;
+  const { containerRef, disabled, entities } = props;
   // router
   // const router = useAppRouter();
   // store hooks
@@ -80,8 +71,8 @@ export const useMultipleSelect = (props: Props) => {
 
   const entitiesList: TEntityDetails[] = useMemo(
     () =>
+      // oxlint-disable-next-line eslint-plugin-unicorn/prefer-array-flat-map -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file
       groups
-        // oxlint-disable-next-line eslint-plugin-unicorn/prefer-array-flat-map -- upstream code
         ?.map((groupID) =>
           entities?.[groupID]?.map((entityID) => ({
             entityID,
@@ -228,22 +219,12 @@ export const useMultipleSelect = (props: Props) => {
     (e: React.MouseEvent, entityID: string, groupID: string) => {
       if (disabled) return;
       const lastSelectedEntityDetails = getLastSelectedEntityDetails();
-      const isRangeAllowed = rangeScope === "all" || lastSelectedEntityDetails?.groupID === groupID;
-      if (e.shiftKey && lastSelectedEntityDetails && isRangeAllowed) {
-        // match the group too: an entity can show in several groups
-        const currentEntityIndex = entitiesList.findIndex(
-          (entity) => entity?.entityID === entityID && entity.groupID === groupID
-        );
+      if (e.shiftKey && lastSelectedEntityDetails) {
+        const currentEntityIndex = entitiesList.findIndex((entity) => entity?.entityID === entityID);
 
         const lastEntityIndex = entitiesList.findIndex(
-          (entity) =>
-            entity?.entityID === lastSelectedEntityDetails.entityID &&
-            entity.groupID === lastSelectedEntityDetails.groupID
+          (entity) => entity?.entityID === lastSelectedEntityDetails.entityID
         );
-        if (currentEntityIndex === -1 || lastEntityIndex === -1) {
-          handleEntitySelection({ entityID, groupID }, false);
-          return;
-        }
         if (lastEntityIndex < currentEntityIndex) {
           for (let i = lastEntityIndex + 1; i <= currentEntityIndex; i++) {
             const entityDetails = entitiesList[i];
@@ -273,7 +254,7 @@ export const useMultipleSelect = (props: Props) => {
 
       handleEntitySelection({ entityID, groupID }, false);
     },
-    [disabled, entitiesList, handleEntitySelection, getLastSelectedEntityDetails, rangeScope]
+    [disabled, entitiesList, handleEntitySelection, getLastSelectedEntityDetails]
   );
 
   /**
@@ -415,8 +396,6 @@ export const useMultipleSelect = (props: Props) => {
       handleGroupClick,
       isGroupSelected,
       isSelectionDisabled: disabled,
-      entitiesList,
-      handleEntitySelection,
     }),
     [
       clearSelection,
@@ -426,8 +405,6 @@ export const useMultipleSelect = (props: Props) => {
       handleEntityClick,
       handleGroupClick,
       isGroupSelected,
-      entitiesList,
-      handleEntitySelection,
     ]
   );
 

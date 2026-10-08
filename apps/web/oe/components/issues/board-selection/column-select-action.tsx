@@ -8,8 +8,27 @@ import { observer } from "mobx-react";
 import { useTranslation } from "@plane/i18n";
 import { Checkbox } from "@plane/ui";
 import { cn } from "@plane/utils";
-import { getGroupsSelectionStatus, toggleGroupsSelection } from "@/plane-web/components/issues/selection/actions";
+import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 import { useBoardColumnGroupIds, useBoardSelection } from "./context";
+
+type TSelectionStatus = "empty" | "partial" | "complete";
+
+/** Selection status of the union of several groups (a column split in swimlanes). */
+const getGroupsSelectionStatus = (helpers: TSelectionHelper, groupIds: string[]): TSelectionStatus => {
+  const statuses = groupIds.map((groupId) => helpers.isGroupSelected(groupId));
+  if (statuses.every((status) => status === "empty")) return "empty";
+  if (statuses.every((status) => status === "complete")) return "complete";
+  return "partial";
+};
+
+/** Selects every card of the groups when none is selected, unselects them otherwise. */
+const toggleGroupsSelection = (helpers: TSelectionHelper, groupIds: string[]) => {
+  // handleGroupClick selects an empty group and unselects any other one
+  const isEmpty = getGroupsSelectionStatus(helpers, groupIds) === "empty";
+  groupIds
+    .filter((groupId) => isEmpty || helpers.isGroupSelected(groupId) !== "empty")
+    .forEach((groupId) => helpers.handleGroupClick(groupId));
+};
 
 type Props = {
   columnId: string;

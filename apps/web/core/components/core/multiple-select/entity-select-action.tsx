@@ -13,7 +13,6 @@ import { cn } from "@plane/utils";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 
 type Props = {
-  "aria-label"?: string;
   className?: string;
   disabled?: boolean;
   groupId: string;
@@ -22,7 +21,7 @@ type Props = {
 };
 
 export const MultipleSelectEntityAction = observer(function MultipleSelectEntityAction(props: Props) {
-  const { "aria-label": ariaLabel, className, disabled = false, groupId, id, selectionHelpers } = props;
+  const { className, disabled = false, groupId, id, selectionHelpers } = props;
   // derived values
   const isSelected = selectionHelpers.getIsEntitySelected(id);
 
@@ -37,7 +36,6 @@ export const MultipleSelectEntityAction = observer(function MultipleSelectEntity
         selectionHelpers.handleEntityClick(e, id, groupId);
       }}
       checked={isSelected}
-      aria-label={ariaLabel}
       data-entity-group-id={groupId}
       data-entity-id={id}
       disabled={disabled}

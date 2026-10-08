@@ -44,7 +44,7 @@ export const useBoardColumnGroupIds = (columnId: string): string[] => {
 
 /**
  * Selection group of a board card: its column, or its column × swimlane cell when the board is
- * sub-grouped, so that a shift + click range never leaves the cell. Always build ids with this.
+ * sub-grouped. Always build ids with this.
  */
 export const getBoardCellGroupId = (columnId: string, subGroupId?: string | null): string =>
   !subGroupId || subGroupId === "null" ? columnId : `${columnId}__${subGroupId}`;

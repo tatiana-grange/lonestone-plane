@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { differenceWith, remove, isEqual, uniqBy } from "lodash-es";
+import { differenceWith, remove, isEqual } from "lodash-es";
 import { action, computed, makeObservable, observable, runInAction } from "mobx";
 import { computedFn } from "mobx-utils";
 // hooks
@@ -31,7 +31,6 @@ export type IMultipleSelectStore = {
   updatePreviousActiveEntity: (entityDetails: TEntityDetails | null) => void;
   updateNextActiveEntity: (entityDetails: TEntityDetails | null) => void;
   updateActiveEntityDetails: (entityDetails: TEntityDetails | null) => void;
-  updateSelectedEntityGroup: (entityID: string, groupID: string) => void;
   clearSelection: () => void;
 };
 
@@ -70,7 +69,6 @@ export class MultipleSelectStore implements IMultipleSelectStore {
       updatePreviousActiveEntity: action,
       updateNextActiveEntity: action,
       updateActiveEntityDetails: action,
-      updateSelectedEntityGroup: action,
       clearSelection: action,
     });
 
@@ -142,7 +140,7 @@ export class MultipleSelectStore implements IMultipleSelectStore {
    * @param {TEntityDetails} entityDetails
    * @param {"add" | "remove"} action
    */
-  // oxlint-disable-next-line no-shadow -- upstream code, param shadows the mobx `action` import
+  // oxlint-disable-next-line no-shadow -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file
   updateSelectedEntityDetails = (entityDetails: TEntityDetails, action: "add" | "remove") => {
     if (action === "add") {
       runInAction(() => {
@@ -167,17 +165,13 @@ export class MultipleSelectStore implements IMultipleSelectStore {
    * @param {TEntityDetails[]} entitiesList
    * @param {"add" | "remove"} action
    */
-  // oxlint-disable-next-line no-shadow -- upstream code, param shadows the mobx `action` import
+  // oxlint-disable-next-line no-shadow -- upstream code, unrelated to LONESTONEP-5: silenced only because the pre-commit lint checks the whole touched file
   bulkUpdateSelectedEntityDetails = (entitiesList: TEntityDetails[], action: "add" | "remove") => {
     if (action === "add") {
       runInAction(() => {
         let newEntities: TEntityDetails[] = [];
-        // compare by entity only: an entity already selected under another group must not be duplicated
-        newEntities = differenceWith(this.selectedEntityDetails, entitiesList, (obj1, obj2) =>
-          isEqual(obj1.entityID, obj2.entityID)
-        );
-        // a work item shown in several groups (e.g. grouped by labels) is listed once per group: keep one
-        newEntities = newEntities.concat(uniqBy(entitiesList, (en) => en.entityID));
+        newEntities = differenceWith(this.selectedEntityDetails, entitiesList, isEqual);
+        newEntities = newEntities.concat(entitiesList);
         this.selectedEntityDetails = newEntities;
         if (entitiesList.length > 0) this.updateLastSelectedEntityDetails(entitiesList[entitiesList.length - 1]);
       });
@@ -189,21 +183,6 @@ export class MultipleSelectStore implements IMultipleSelectStore {
         this.selectedEntityDetails = newEntities;
       });
     }
-  };
-
-  /**
-   * @description move a selected entity to the group it is now displayed in (e.g. a board card that changed column)
-   * @param {string} entityID
-   * @param {string} groupID
-   */
-  updateSelectedEntityGroup = (entityID: string, groupID: string) => {
-    runInAction(() => {
-      const entityDetails = this.selectedEntityDetails.find((en) => en.entityID === entityID);
-      if (entityDetails) entityDetails.groupID = groupID;
-      if (this.lastSelectedEntityDetails?.entityID === entityID) {
-        this.lastSelectedEntityDetails = { entityID, groupID };
-      }
-    });
   };
 
   /**

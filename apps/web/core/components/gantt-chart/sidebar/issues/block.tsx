@@ -16,8 +16,6 @@ import { IssueGanttSidebarBlock } from "@/components/issues/issue-layouts/gantt/
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 import { useTimeLineChartStore } from "@/hooks/use-timeline-chart";
-// plane web
-import { getSelectionClickCaptureHandler } from "@/plane-web/components/issues/selection";
 // local imports
 import { BLOCK_HEIGHT, GANTT_SELECT_GROUP } from "../../constants";
 
@@ -46,12 +44,6 @@ export const IssuesSidebarBlock = observer(function IssuesSidebarBlock(props: Pr
 
   return (
     <div
-      data-selection-entity-id={block.id}
-      data-selection-group-id={GANTT_SELECT_GROUP}
-      onClickCapture={
-        // cmd/ctrl + click selects instead of opening a new tab
-        enableSelection ? getSelectionClickCaptureHandler(selectionHelpers, block.id, GANTT_SELECT_GROUP) : undefined
-      }
       className={cn("group/list-block", {
         "rounded-sm bg-layer-1": isDragging,
         "rounded-l-sm border border-r-0 border-accent-strong": getIsIssuePeeked(block.data.id),

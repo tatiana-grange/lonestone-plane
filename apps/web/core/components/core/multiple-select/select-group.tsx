@@ -8,31 +8,22 @@ import { observer } from "mobx-react";
 // hooks
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 import { useMultipleSelect } from "@/hooks/use-multiple-select";
-// plane web hooks
-import { useClearSelectionOnBackgroundClick } from "@/plane-web/hooks/use-clear-selection-on-background-click";
-import { useFollowSelectedEntityGroup } from "@/plane-web/hooks/use-follow-selected-entity-group";
-import { useSelectionShortcuts } from "@/plane-web/hooks/use-selection-shortcuts";
 
 type Props = {
   children: (helpers: TSelectionHelper) => React.ReactNode;
   containerRef: React.MutableRefObject<HTMLElement | null>;
   disabled?: boolean;
   entities: Record<string, string[]>; // { groupID: entityIds[] }
-  rangeScope?: "all" | "group";
 };
 
 export const MultipleSelectGroup = observer(function MultipleSelectGroup(props: Props) {
-  const { children, containerRef, disabled = false, entities, rangeScope } = props;
+  const { children, containerRef, disabled = false, entities } = props;
 
   const helpers = useMultipleSelect({
     containerRef,
     disabled,
     entities,
-    rangeScope,
   });
-  useSelectionShortcuts({ helpers, disabled });
-  useClearSelectionOnBackgroundClick({ containerRef, helpers, disabled });
-  useFollowSelectedEntityGroup({ helpers, disabled });
 
   return <>{children(helpers)}</>;
 });

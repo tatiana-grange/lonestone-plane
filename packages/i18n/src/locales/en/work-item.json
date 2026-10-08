@@ -329,7 +329,6 @@
     },
     "selected_count": "{count, plural, one{# selected} other{# selected}}",
     "clear_selection": "Clear selection",
-    "select_item": "Select {identifier}",
     "select_column": "Select all in {column}",
     "clear_start_date": "Clear start date",
     "clear_due_date": "Clear due date",

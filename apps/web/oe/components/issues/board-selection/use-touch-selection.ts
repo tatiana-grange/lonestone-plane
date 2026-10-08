@@ -8,7 +8,6 @@ import { useEffect, useRef } from "react";
 import type { MouseEvent, PointerEvent } from "react";
 import { useMultipleSelectStore } from "@/hooks/store/use-multiple-select-store";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
-import { toggleEntity } from "@/plane-web/components/issues/selection/actions";
 
 const LONG_PRESS_MS = 500;
 const MOVE_TOLERANCE_PX = 10;
@@ -63,7 +62,8 @@ export const useTouchSelection = (params: {
       timerRef.current = setTimeout(() => {
         timerRef.current = null;
         longPressDoneRef.current = true;
-        toggleEntity(helpers, entityID, groupID);
+        // no shift key on touch: a plain toggle
+        helpers.handleEntityClick(event, entityID, groupID);
       }, LONG_PRESS_MS);
     },
     onPointerMove: (event) => {
@@ -88,7 +88,7 @@ export const useTouchSelection = (params: {
       if (lastPointerTypeRef.current === "touch" && isSelectionActive && !isOnControl) {
         event.preventDefault();
         event.stopPropagation();
-        toggleEntity(helpers, entityID, groupID);
+        helpers.handleEntityClick(event, entityID, groupID);
       }
     },
   };
