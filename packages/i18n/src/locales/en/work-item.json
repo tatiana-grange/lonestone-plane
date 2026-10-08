@@ -340,9 +340,8 @@
       "error_message": "Something went wrong. No work item was updated."
     },
     "failure_reasons": {
-      "not_found": "{count, plural, one{# no longer available} other{# no longer available}}",
-      "invalid_date_range": "{count, plural, one{# with start date after due date} other{# with start date after due date}}",
-      "request_failed": "{count, plural, one{# not sent after an error} other{# not sent after an error}}"
+      "not_found": "Some work items are no longer available.",
+      "invalid_date_range": "The start date would be after the due date for some work items."
     }
   },
   "recurring_work_items": {

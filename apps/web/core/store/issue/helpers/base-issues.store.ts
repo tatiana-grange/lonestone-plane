@@ -26,7 +26,6 @@ import type {
   TBulkIssueProperties,
   TBulkIssueRemovals,
   TBulkOperationsPayload,
-  TBulkOperationsResponse,
   IBlockUpdateDependencyData,
 } from "@plane/types";
 import { EIssueServiceType, EIssueLayoutTypes } from "@plane/types";
@@ -729,24 +728,21 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
    * @description bulk update properties of selected issues
    * @param {TBulkOperationsPayload} data
    */
-  bulkUpdateProperties = async (
-    workspaceSlug: string,
-    projectId: string,
-    data: TBulkOperationsPayload
-  ): Promise<TBulkOperationsResponse> => {
+  bulkUpdateProperties = async (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => {
+    const issueIds = data.issue_ids;
     // make request to update issue properties
-    const response = await this.issueService.bulkOperations(workspaceSlug, projectId, data);
-    // update only the issues actually changed by the server
+    await this.issueService.bulkOperations(workspaceSlug, projectId, data);
+    // update issues in the store
     runInAction(() => {
-      response.updated_issue_ids.forEach((issueId) => {
+      issueIds.forEach((issueId) => {
         const issueBeforeUpdate = clone(this.rootIssueStore.issues.getIssueById(issueId));
-        if (!issueBeforeUpdate) return;
-        Object.entries(data.properties).forEach(([key, propertyValue]) => {
-          // removals (remove_assignee_ids, ...) target the matching multi-value field
+        if (!issueBeforeUpdate) throw new Error("Work item not found");
+        Object.keys(data.properties).forEach((key) => {
+          // fork: removals (remove_assignee_ids, ...) target the matching multi-value field
           const removedField = BULK_REMOVAL_FIELDS[key as keyof TBulkIssueRemovals];
           if (removedField) {
             const existingValue = issueBeforeUpdate[removedField];
-            const removedValues = new Set(Array.isArray(propertyValue) ? propertyValue : []);
+            const removedValues = new Set(data.properties[key as keyof TBulkIssueRemovals]);
             this.rootIssueStore.issues.updateIssue(issueId, {
               [removedField]: (Array.isArray(existingValue) ? existingValue : []).filter(
                 (value) => !removedValues.has(value)
@@ -755,6 +751,7 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
             return;
           }
           const property = key as keyof TBulkIssueProperties;
+          const propertyValue = data.properties[property];
           // update root issue map properties
           if (Array.isArray(propertyValue)) {
             // if property value is array, append it to the existing values
@@ -774,16 +771,13 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
         const issueDetails = this.rootIssueStore.issues.getIssueById(issueId);
         this.updateIssueList(issueDetails, issueBeforeUpdate);
       });
-      // in a module's view, work items taken out of that module leave the list
+      // fork: in a module's view, work items taken out of that module leave the list
       if (this.moduleId && data.properties.remove_module_ids?.includes(this.moduleId)) {
-        response.updated_issue_ids.forEach((issueId) => this.removeIssueFromList(issueId));
+        issueIds.forEach((issueId) => this.removeIssueFromList(issueId));
       }
     });
-    // in a cycle or module view, any change (state, dates, module...) can affect its progress stats
-    if (response.updated_issue_ids.length > 0 && (this.cycleId || this.moduleId)) {
-      this.fetchParentStats(workspaceSlug, projectId);
-    }
-    return response;
+    // fork: in a cycle or module view, any change (state, dates, module...) can affect its progress stats
+    if (this.cycleId || this.moduleId) this.fetchParentStats(workspaceSlug, projectId);
   };
 
   async updateIssueDates(

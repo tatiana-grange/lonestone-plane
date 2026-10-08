@@ -4,9 +4,12 @@
 
 """Bulk update of work item properties within a single project.
 
-Each issue is processed independently: it ends up either updated, unchanged or
-failed (per-issue reason). Writes happen in one transaction; activities and
-webhooks are emitted per updated issue once the transaction is committed.
+All or nothing: if one work item cannot take the change (not found, start date
+after due date), the whole request is rejected and nothing is written, so the
+upstream web store can apply the change to every sent work item. Otherwise each
+work item ends up either updated or unchanged. Writes happen in one transaction;
+activities and webhooks are emitted per updated issue once the transaction is
+committed.
 """
 
 import json
@@ -48,11 +51,6 @@ class Change:
     meta: dict = field(default_factory=dict)
 
 
-@dataclass
-class Failure:
-    code: str
-
-
 class BulkPropertyHandler:
     """Base class for one supported property.
 
@@ -65,7 +63,7 @@ class BulkPropertyHandler:
     def validate(self, value, *, project_id, slug):
         raise NotImplementedError
 
-    def plan(self, issue, value, *, properties) -> Change | Failure | None:
+    def plan(self, issue, value, *, properties) -> Change | None:
         raise NotImplementedError
 
     def apply(self, changes, *, actor) -> None:
@@ -175,7 +173,9 @@ class _DateHandler(_ReplaceFieldHandler):
         other = properties[self.other_field] if self.other_field in properties else getattr(issue, self.other_field)
         start, target = (value, other) if self.field == "start_date" else (other, value)
         if start is not None and target is not None and start > target:
-            return Failure("invalid_date_range")
+            raise BulkUpdateValidationError(
+                "invalid_date_range", "The start date would be after the due date for some work items"
+            )
         return super().plan(issue, value, properties=properties)
 
     @staticmethod
@@ -449,10 +449,10 @@ def _issue_queryset(*, slug, project_id, issue_ids):
 
 
 def bulk_update_issues(*, slug, project_id, issue_ids, properties, actor, origin) -> dict:
-    """Apply ``properties`` to ``issue_ids`` and return the per-issue partition.
+    """Apply ``properties`` to ``issue_ids`` and return the updated / unchanged partition.
 
-    Raises ``BulkUpdateValidationError`` when a value is invalid for the project;
-    nothing is written in that case.
+    Raises ``BulkUpdateValidationError`` when a value is invalid for the project or
+    for one of the work items; nothing is written in that case.
     """
     issue_ids = list(dict.fromkeys(str(issue_id) for issue_id in issue_ids))
     handlers = {}
@@ -465,31 +465,22 @@ def bulk_update_issues(*, slug, project_id, issue_ids, properties, actor, origin
         normalized[key] = handler.validate(raw_value, project_id=project_id, slug=slug)
 
     issues = {str(issue.id): issue for issue in _issue_queryset(slug=slug, project_id=project_id, issue_ids=issue_ids)}
+    if len(issues) != len(issue_ids):
+        raise BulkUpdateValidationError("not_found", "Some work items were not found in the project")
 
     updated_issue_ids = []
     unchanged_issue_ids = []
-    failed = []
     changes_by_issue: dict[str, list[tuple[str, Change]]] = {}
 
     for issue_id in issue_ids:
-        issue = issues.get(issue_id)
-        if issue is None:
-            failed.append({"issue_id": issue_id, "code": "not_found"})
-            continue
-
+        issue = issues[issue_id]
         issue_changes = []
-        failure = None
         for key, handler in handlers.items():
-            outcome = handler.plan(issue, normalized[key], properties=normalized)
-            if isinstance(outcome, Failure):
-                failure = outcome
-                break
-            if outcome is not None:
-                issue_changes.append((key, outcome))
+            change = handler.plan(issue, normalized[key], properties=normalized)
+            if change is not None:
+                issue_changes.append((key, change))
 
-        if failure is not None:
-            failed.append({"issue_id": issue_id, "code": failure.code})
-        elif issue_changes:
+        if issue_changes:
             updated_issue_ids.append(issue_id)
             changes_by_issue[issue_id] = issue_changes
         else:
@@ -511,7 +502,6 @@ def bulk_update_issues(*, slug, project_id, issue_ids, properties, actor, origin
     return {
         "updated_issue_ids": updated_issue_ids,
         "unchanged_issue_ids": unchanged_issue_ids,
-        "failed": failed,
     }
 
 

@@ -13,7 +13,6 @@ import type {
   IssuePaginationOptions,
   TIssuesResponse,
   TBulkOperationsPayload,
-  TBulkOperationsResponse,
 } from "@plane/types";
 // helpers
 import { getDistributionPathsPostUpdate } from "@plane/utils";
@@ -59,11 +58,7 @@ export interface IModuleIssues extends IBaseIssuesStore {
   ) => Promise<TIssue | undefined>;
   removeBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
   archiveBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
-  bulkUpdateProperties: (
-    workspaceSlug: string,
-    projectId: string,
-    data: TBulkOperationsPayload
-  ) => Promise<TBulkOperationsResponse>;
+  bulkUpdateProperties: (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => Promise<void>;
 }
 
 export class ModuleIssues extends BaseIssuesStore implements IModuleIssues {
@@ -98,7 +93,6 @@ export class ModuleIssues extends BaseIssuesStore implements IModuleIssues {
    */
   fetchParentStats = (workspaceSlug: string, projectId?: string, id?: string) => {
     const moduleId = id ?? this.moduleId;
-    // oxlint-disable-next-line no-unused-expressions -- upstream code, left as is to keep upstream merges clean
     projectId &&
       moduleId &&
       this.rootIssueStore.rootStore.module.fetchModuleDetails(workspaceSlug, projectId, moduleId);
@@ -122,7 +116,6 @@ export class ModuleIssues extends BaseIssuesStore implements IModuleIssues {
 
       const moduleId = id ?? this.moduleId;
 
-      // oxlint-disable-next-line no-unused-expressions -- upstream code, left as is to keep upstream merges clean
       moduleId && this.rootIssueStore.rootStore.module.updateModuleDistribution(distributionUpdates, moduleId);
     } catch (_e) {
       console.warn("could not update module statistics");
@@ -250,7 +243,6 @@ export class ModuleIssues extends BaseIssuesStore implements IModuleIssues {
       await this.addModulesToIssue(workspaceSlug, projectId, response.id, moduleIds);
 
       return response;
-      // oxlint-disable-next-line no-useless-catch -- upstream code, left as is to keep upstream merges clean
     } catch (error) {
       throw error;
     }
@@ -285,7 +277,6 @@ export class ModuleIssues extends BaseIssuesStore implements IModuleIssues {
       }
 
       return response;
-      // oxlint-disable-next-line no-useless-catch -- upstream code, left as is to keep upstream merges clean
     } catch (error) {
       throw error;
     }

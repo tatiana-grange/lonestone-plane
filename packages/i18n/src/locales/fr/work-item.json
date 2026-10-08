@@ -340,9 +340,8 @@
       "error_message": "Une erreur s'est produite. Aucun élément de travail n'a été mis à jour."
     },
     "failure_reasons": {
-      "not_found": "{count, plural, one{# n'est plus disponible} many{# ne sont plus disponibles} other{# ne sont plus disponibles}}",
-      "invalid_date_range": "{count, plural, one{# avec une date de début postérieure à la date d'échéance} many{# avec une date de début postérieure à la date d'échéance} other{# avec une date de début postérieure à la date d'échéance}}",
-      "request_failed": "{count, plural, one{# non envoyé après une erreur} many{# non envoyés après une erreur} other{# non envoyés après une erreur}}"
+      "not_found": "Certains éléments de travail ne sont plus disponibles.",
+      "invalid_date_range": "La date de début serait postérieure à la date d'échéance pour certains éléments de travail."
     }
   },
   "recurring_work_items": {

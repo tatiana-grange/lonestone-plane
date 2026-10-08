@@ -100,24 +100,25 @@ def _run(workspace, project, issue_ids, properties, actor):
 @pytest.mark.unit
 @pytest.mark.django_db
 class TestBulkUpdateService:
-    def test_inactive_issues_are_not_found(self, workspace, project, other_project, create_user, monkeypatch, tasks):
+    @pytest.mark.parametrize("kind", ["foreign", "archived", "draft"])
+    def test_inactive_issue_rejects_the_whole_request(
+        self, workspace, project, other_project, create_user, monkeypatch, tasks, kind
+    ):
         monkeypatch.setitem(issue_bulk_update.PROPERTY_HANDLERS, "state_id", _NameHandler())
-        foreign = _make_issue(other_project, "Foreign")
-        archived = _make_issue(project, "Archived", archived_at=timezone.now())
-        draft = _make_issue(project, "Draft", is_draft=True)
+        inactive = {
+            "foreign": lambda: _make_issue(other_project, "Inactive"),
+            "archived": lambda: _make_issue(project, "Inactive", archived_at=timezone.now()),
+            "draft": lambda: _make_issue(project, "Inactive", is_draft=True),
+        }[kind]()
         active = _make_issue(project, "Active")
 
-        ids = [str(foreign.id), str(archived.id), str(draft.id), str(active.id)]
-        result = _run(workspace, project, ids, {"state_id": "Renamed"}, create_user)
+        with pytest.raises(BulkUpdateValidationError) as error:
+            _run(workspace, project, [str(inactive.id), str(active.id)], {"state_id": "Renamed"}, create_user)
 
-        assert {item["issue_id"]: item["code"] for item in result["failed"]} == {
-            str(foreign.id): "not_found",
-            str(archived.id): "not_found",
-            str(draft.id): "not_found",
-        }
-        assert result["updated_issue_ids"] == [str(active.id)]
-        foreign.refresh_from_db()
-        assert foreign.name == "Foreign"
+        assert error.value.code == "not_found"
+        active.refresh_from_db()
+        inactive.refresh_from_db()
+        assert (active.name, inactive.name) == ("Active", "Inactive")
 
     def test_duplicates_are_processed_once(
         self, workspace, project, create_user, monkeypatch, tasks, django_capture_on_commit_callbacks
@@ -128,7 +129,7 @@ class TestBulkUpdateService:
         with django_capture_on_commit_callbacks(execute=True):
             result = _run(workspace, project, [str(issue.id), str(issue.id)], {"state_id": "Renamed"}, create_user)
 
-        assert result == {"updated_issue_ids": [str(issue.id)], "unchanged_issue_ids": [], "failed": []}
+        assert result == {"updated_issue_ids": [str(issue.id)], "unchanged_issue_ids": []}
         issue_activity, model_activity = tasks
         assert issue_activity.delay.call_count == 1
         assert model_activity.delay.call_count == 1
@@ -214,13 +215,15 @@ class TestAssigneesHandler:
 class TestDateMerge:
     def test_start_after_stored_target_fails(self, workspace, project, create_user, tasks):
         issue = _make_issue(project, "Work item", target_date=date(2026, 10, 10))
-        result = _run(workspace, project, [str(issue.id)], {"start_date": "2026-10-20"}, create_user)
-        assert result["failed"] == [{"issue_id": str(issue.id), "code": "invalid_date_range"}]
+        with pytest.raises(BulkUpdateValidationError) as error:
+            _run(workspace, project, [str(issue.id)], {"start_date": "2026-10-20"}, create_user)
+        assert error.value.code == "invalid_date_range"
 
     def test_target_before_stored_start_fails(self, workspace, project, create_user, tasks):
         issue = _make_issue(project, "Work item", start_date=date(2026, 10, 20))
-        result = _run(workspace, project, [str(issue.id)], {"target_date": "2026-10-10"}, create_user)
-        assert result["failed"] == [{"issue_id": str(issue.id), "code": "invalid_date_range"}]
+        with pytest.raises(BulkUpdateValidationError) as error:
+            _run(workspace, project, [str(issue.id)], {"target_date": "2026-10-10"}, create_user)
+        assert error.value.code == "invalid_date_range"
 
     def test_clearing_a_date_is_always_valid(self, workspace, project, create_user, tasks):
         issue = _make_issue(project, "Work item", start_date=date(2026, 10, 20), target_date=date(2026, 10, 25))

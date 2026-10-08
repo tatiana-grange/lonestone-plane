@@ -16,7 +16,6 @@ import type {
   TIssuesResponse,
   ViewFlags,
   TBulkOperationsPayload,
-  TBulkOperationsResponse,
 } from "@plane/types";
 // helpers
 import { getDistributionPathsPostUpdate } from "@plane/utils";
@@ -89,11 +88,7 @@ export interface ICycleIssues extends IBaseIssuesStore {
   ) => Promise<TIssue | undefined>;
   removeBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
   archiveBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
-  bulkUpdateProperties: (
-    workspaceSlug: string,
-    projectId: string,
-    data: TBulkOperationsPayload
-  ) => Promise<TBulkOperationsResponse>;
+  bulkUpdateProperties: (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => Promise<void>;
 
   transferIssuesFromCycle: (
     workspaceSlug: string,

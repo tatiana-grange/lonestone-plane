@@ -21,7 +21,6 @@ import type {
   ViewFlags,
   TIssue,
   TBulkOperationsPayload,
-  TBulkOperationsResponse,
 } from "@plane/types";
 import { getCurrentDateTimeInISO, convertToISODateString } from "@plane/utils";
 // services
@@ -110,11 +109,7 @@ export interface IWorkspaceDraftIssues {
   archiveIssue: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
   archiveBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
   removeBulkIssues: (workspaceSlug: string, projectId: string, issueIds: string[]) => Promise<void>;
-  bulkUpdateProperties: (
-    workspaceSlug: string,
-    projectId: string,
-    data: TBulkOperationsPayload
-  ) => Promise<TBulkOperationsResponse>;
+  bulkUpdateProperties: (workspaceSlug: string, projectId: string, data: TBulkOperationsPayload) => Promise<void>;
 }
 
 export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
@@ -242,7 +237,6 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
           const newIssueIds = issueIds.filter((issueId) => !existingIssueIds.includes(issueId));
           this.addIssue(results);
           // issue map update
-          // oxlint-disable-next-line no-shadow -- upstream code, left as is to keep upstream merges clean
           update(this.issueMapIds, [workspaceSlug], (existingIssueIds = []) => [...newIssueIds, ...existingIssueIds]);
           this.loader = undefined;
         } else {
@@ -298,7 +292,6 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
         set(this.issuesMap, [issueId], {
           ...issueBeforeUpdate,
           ...payload,
-          // oxlint-disable-next-line eslint-plugin-unicorn/no-useless-spread -- upstream code, left as is to keep upstream merges clean
           ...{ updated_at: getCurrentDateTimeInISO() },
         });
       });
@@ -432,9 +425,5 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
   archiveIssue = async (_workspaceSlug: string, _projectId: string, _issueId: string) => {};
   archiveBulkIssues = async (_workspaceSlug: string, _projectId: string, _issueIds: string[]) => {};
   removeBulkIssues = async (_workspaceSlug: string, _projectId: string, _issueIds: string[]) => {};
-  bulkUpdateProperties = async (
-    _workspaceSlug: string,
-    _projectId: string,
-    _data: TBulkOperationsPayload
-  ): Promise<TBulkOperationsResponse> => ({ updated_issue_ids: [], unchanged_issue_ids: [], failed: [] });
+  bulkUpdateProperties = async (_workspaceSlug: string, _projectId: string, _data: TBulkOperationsPayload) => {};
 }

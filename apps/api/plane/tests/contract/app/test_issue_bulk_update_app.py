@@ -173,11 +173,8 @@ def _ids(items):
 def _assert_partition(data, requested_ids):
     updated = set(data["updated_issue_ids"])
     unchanged = set(data["unchanged_issue_ids"])
-    failed = {item["issue_id"] for item in data["failed"]}
     assert not (updated & unchanged)
-    assert not (updated & failed)
-    assert not (unchanged & failed)
-    assert updated | unchanged | failed == set(requested_ids)
+    assert updated | unchanged == set(requested_ids)
 
 
 @pytest.mark.contract
@@ -257,22 +254,24 @@ class TestBulkUpdateEnvelope:
         assert response.data["code"] == "unsupported_property"
 
     @pytest.mark.django_db
-    def test_foreign_and_unknown_ids_are_not_found(
-        self, session_client, workspace, project, issues, foreign_issue, ready_state, tasks
+    @pytest.mark.parametrize("which", ["foreign", "unknown"])
+    def test_foreign_or_unknown_id_rejects_the_whole_request(
+        self, session_client, workspace, project, issues, foreign_issue, ready_state, tasks, which
     ):
-        unknown_id = str(uuid4())
-        requested = [*_ids(issues), str(foreign_issue.id), unknown_id, str(issues[0].id)]
+        missing_id = str(foreign_issue.id) if which == "foreign" else str(uuid4())
         response = session_client.post(
             _url(workspace, project.id),
-            {"issue_ids": requested, "properties": {"state_id": str(ready_state.id)}},
+            {"issue_ids": [*_ids(issues), missing_id], "properties": {"state_id": str(ready_state.id)}},
             format="json",
         )
-        assert response.status_code == status.HTTP_200_OK
-        failed = {item["issue_id"]: item["code"] for item in response.data["failed"]}
-        assert failed == {str(foreign_issue.id): "not_found", unknown_id: "not_found"}
-        _assert_partition(response.data, requested)
-        foreign_issue.refresh_from_db()
-        assert foreign_issue.state_id != ready_state.id
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["code"] == "not_found"
+        for issue in [*issues, foreign_issue]:
+            issue.refresh_from_db()
+            assert issue.state_id != ready_state.id
+        issue_activity, model_activity = tasks
+        assert issue_activity.delay.call_count == 0
+        assert model_activity.delay.call_count == 0
 
 
 @pytest.mark.contract
@@ -534,14 +533,16 @@ class TestBulkUpdateDates:
         assert response.data["code"] == "invalid_value"
 
     @pytest.mark.django_db
-    def test_target_before_stored_start_fails_only_that_issue(self, session_client, workspace, project, issues, tasks):
+    def test_target_before_stored_start_rejects_the_whole_request(
+        self, session_client, workspace, project, issues, tasks
+    ):
         Issue.objects.filter(pk=issues[0].pk).update(start_date=date(2026, 10, 20))
         response = _post(session_client, workspace, project, _ids(issues), {"target_date": "2026-10-10"})
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data["failed"] == [{"issue_id": str(issues[0].id), "code": "invalid_date_range"}]
-        assert sorted(response.data["updated_issue_ids"]) == sorted(_ids(issues[1:]))
-        issues[0].refresh_from_db()
-        assert issues[0].target_date is None
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["code"] == "invalid_date_range"
+        for issue in issues:
+            issue.refresh_from_db()
+            assert issue.target_date is None
 
 
 @pytest.fixture
@@ -653,20 +654,16 @@ class TestBulkUpdateMixedBatch:
     ):
         extra = Issue(name="Work item 3", project=project, workspace=workspace)
         extra.save(created_by_id=create_user.id)
-        late_start, already_due, updated_a, updated_b = issues[0], issues[1], issues[2], extra
-        Issue.objects.filter(pk=late_start.pk).update(start_date=date(2026, 10, 20))
+        # updated_a has a start date before the new due date: the date check lets it through
+        updated_a, already_due, updated_b = issues[0], issues[1], extra
+        Issue.objects.filter(pk=updated_a.pk).update(start_date=date(2026, 10, 1))
         Issue.objects.filter(pk=already_due.pk).update(target_date=date(2026, 10, 10))
-        unknown_id = str(uuid4())
-        requested = [unknown_id, *_ids([late_start, already_due, updated_a, updated_b])]
+        requested = _ids([updated_a, already_due, updated_b])
 
         with django_capture_on_commit_callbacks(execute=True):
             response = _post(session_client, workspace, project, requested, {"target_date": "2026-10-10"})
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["failed"] == [
-            {"issue_id": unknown_id, "code": "not_found"},
-            {"issue_id": str(late_start.id), "code": "invalid_date_range"},
-        ]
         assert response.data["unchanged_issue_ids"] == [str(already_due.id)]
         assert response.data["updated_issue_ids"] == _ids([updated_a, updated_b])
         _assert_partition(response.data, requested)
@@ -863,14 +860,12 @@ class TestBulkRemoveMixedBatch:
         without_bob, with_bob_a, with_bob_b = issues
         _assign(with_bob_a, bob)
         _assign(with_bob_b, bob)
-        unknown_id = str(uuid4())
-        requested = [unknown_id, *_ids([without_bob, with_bob_a, with_bob_b])]
+        requested = _ids([without_bob, with_bob_a, with_bob_b])
 
         with django_capture_on_commit_callbacks(execute=True):
             response = _post(session_client, workspace, project, requested, {"remove_assignee_ids": [str(bob.id)]})
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["failed"] == [{"issue_id": unknown_id, "code": "not_found"}]
         assert response.data["unchanged_issue_ids"] == [str(without_bob.id)]
         assert response.data["updated_issue_ids"] == _ids([with_bob_a, with_bob_b])
         _assert_partition(response.data, requested)
