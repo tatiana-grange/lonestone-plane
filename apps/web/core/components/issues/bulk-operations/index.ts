@@ -4,4 +4,5 @@
  * See the LICENSE file for details.
  */
 
-export * from "./root";
+// fork: the bulk actions bar replaces the upstream "Upgrade" banner (./root)
+export * from "@/plane-web/components/issues/bulk-operations";
